@@ -1,0 +1,38 @@
+{
+  "name": "kuff-next",
+  "version": "1.0.0",
+  "description": "KUFF DJ Website - Next.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop kuff-website",
+    "pm2:restart": "pm2 restart kuff-website",
+    "pm2:logs": "pm2 logs kuff-website",
+    "pm2:status": "pm2 status",
+    "pm2:delete": "pm2 delete kuff-website",
+    "pm2:monit": "pm2 monit"
+  },
+  "author": "KUFF",
+  "license": "ISC",
+  "dependencies": {
+    "@auth/supabase-adapter": "^1.11.1",
+    "@supabase/supabase-js": "^2.79.0",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "next": "^16.0.1",
+    "next-auth": "^4.24.13",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.16"
+  }
+}

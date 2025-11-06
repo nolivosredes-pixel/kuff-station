@@ -1,0 +1,51 @@
+{
+  "events": [
+    {
+      "id": 1,
+      "title": "KUFF at Underground Festival",
+      "date": "2025-12-15",
+      "time": "22:00",
+      "location": "Miami, FL",
+      "venue": "Club Space",
+      "description": "Únete a KUFF para una noche inolvidable de Minimal Bass y Tech House.",
+      "flyer": "https://i.postimg.cc/ejemplo/kuff-event-placeholder.jpg",
+      "ticketLink": "https://example.com/tickets",
+      "address": "34 NE 11th St, Miami, FL 33132",
+      "embedMap": "",
+      "photos": []
+    },
+    {
+      "id": 2,
+      "title": "KUFF Live Set",
+      "date": "2025-12-20",
+      "time": "23:00",
+      "location": "Barcelona, Spain",
+      "venue": "Razzmatazz",
+      "description": "Experimenta el sonido único de KUFF en uno de los clubs más icónicos de Europa.",
+      "flyer": "https://i.postimg.cc/ejemplo/kuff-barcelona.jpg",
+      "ticketLink": "https://example.com/tickets",
+      "address": "Carrer dels Almogàvers, 122, Barcelona",
+      "embedMap": "",
+      "photos": []
+    },
+    {
+      "id": 3,
+      "title": "KUFF at Warehouse Party (Ejemplo Evento Pasado)",
+      "date": "2024-01-15",
+      "time": "23:00",
+      "location": "Buenos Aires, Argentina",
+      "venue": "Crobar",
+      "description": "Un evento increíble lleno de energía y música techno.",
+      "flyer": "https://i.postimg.cc/ejemplo/kuff-warehouse.jpg",
+      "ticketLink": "",
+      "address": "Paseo de la Infanta Isabel, Buenos Aires",
+      "embedMap": "",
+      "photos": [
+        "https://i.postimg.cc/ejemplo/foto1.jpg",
+        "https://i.postimg.cc/ejemplo/foto2.jpg",
+        "https://i.postimg.cc/ejemplo/foto3.jpg",
+        "https://i.postimg.cc/ejemplo/foto4.jpg"
+      ]
+    }
+  ]
+}
