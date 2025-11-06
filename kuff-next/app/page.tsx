@@ -260,7 +260,7 @@ export default function Home() {
           <div className="contact-content">
             <div className="contact-info">
               <h3>Management & Booking</h3>
-              <a href="mailto:mgmt@kuffdj.net" className="contact-email">
+              <a href="mailto:mgmt@kuffdj.net" className="contact-email" title="Contact KUFF Management">
                 mgmt@kuffdj.net
               </a>
             </div>
