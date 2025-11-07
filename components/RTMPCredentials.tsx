@@ -40,11 +40,15 @@ export default function RTMPCredentials() {
     <div className="rtmp-credentials">
       <style jsx>{`
         .rtmp-credentials {
-          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-          border-radius: 15px;
+          background: rgba(26, 26, 26, 0.8);
+          backdrop-filter: blur(10px);
+          border-radius: 20px;
           padding: 30px;
           color: white;
           margin-bottom: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.1);
+          font-family: 'Montserrat', sans-serif;
         }
 
         .header {
@@ -56,21 +60,32 @@ export default function RTMPCredentials() {
 
         .title {
           font-size: 1.8em;
-          font-weight: bold;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          background: linear-gradient(135deg, #ffffff 0%, #00d9ff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .info-badge {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(0, 217, 255, 0.2);
           padding: 8px 16px;
-          border-radius: 20px;
+          border-radius: 50px;
           font-size: 0.85em;
+          border: 2px solid rgba(0, 217, 255, 0.3);
+          color: #00d9ff;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-weight: 600;
         }
 
         .description {
-          background: rgba(0, 0, 0, 0.2);
-          border-left: 4px solid rgba(255, 255, 255, 0.5);
+          background: rgba(0, 0, 0, 0.3);
+          border-left: 4px solid #00d9ff;
           padding: 15px;
-          border-radius: 8px;
+          border-radius: 10px;
           margin-bottom: 25px;
           line-height: 1.6;
         }
@@ -79,13 +94,15 @@ export default function RTMPCredentials() {
           display: block;
           margin-bottom: 8px;
           font-size: 1.1em;
+          color: #00d9ff;
         }
 
         .form-section {
-          background: rgba(0, 0, 0, 0.15);
-          border-radius: 10px;
+          background: rgba(0, 0, 0, 0.4);
+          border-radius: 15px;
           padding: 25px;
           margin-bottom: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.1);
         }
 
         .form-group {
@@ -99,29 +116,40 @@ export default function RTMPCredentials() {
         .form-group label {
           display: block;
           margin-bottom: 8px;
-          font-weight: bold;
+          font-weight: 600;
           font-size: 0.95em;
+          color: #b0b0b0;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .form-group select,
         .form-group input {
           width: 100%;
-          padding: 12px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.1);
+          padding: 12px 15px;
+          border: 2px solid rgba(0, 217, 255, 0.3);
+          border-radius: 10px;
+          background: #000000;
           color: white;
           font-size: 1em;
           font-family: 'Courier New', monospace;
+          transition: all 0.3s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+          outline: none;
+          border-color: #00d9ff;
+          box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
         }
 
         .form-group input::placeholder {
-          color: rgba(255, 255, 255, 0.5);
+          color: #666;
         }
 
         .help-text {
           font-size: 0.85em;
-          opacity: 0.8;
+          color: #808080;
           margin-top: 5px;
           font-style: italic;
         }
@@ -167,23 +195,30 @@ export default function RTMPCredentials() {
 
         .copy-btn {
           padding: 8px 16px;
-          background: rgba(255, 255, 255, 0.2);
-          border: none;
-          border-radius: 6px;
-          color: white;
-          font-weight: bold;
+          background: transparent;
+          border: 2px solid #00d9ff;
+          border-radius: 50px;
+          color: #00d9ff;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.3s;
           white-space: nowrap;
           font-size: 0.9em;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .copy-btn:hover {
-          background: rgba(255, 255, 255, 0.3);
+          background: #00d9ff;
+          color: #000000;
+          transform: translateY(-2px);
+          box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
         }
 
         .copy-btn.copied {
           background: #51cf66;
+          border-color: #51cf66;
+          color: white;
         }
 
         .toggle-visibility {
@@ -191,35 +226,44 @@ export default function RTMPCredentials() {
           align-items: center;
           gap: 8px;
           padding: 10px 20px;
-          background: rgba(255, 255, 255, 0.15);
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-radius: 8px;
-          color: white;
-          font-weight: bold;
+          background: transparent;
+          border: 2px solid #00d9ff;
+          border-radius: 50px;
+          color: #00d9ff;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.3s;
           margin-top: 15px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .toggle-visibility:hover {
-          background: rgba(255, 255, 255, 0.25);
+          background: #00d9ff;
+          color: #000000;
+          transform: translateY(-2px);
+          box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
         }
 
         .instructions-box {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 15px;
           padding: 20px;
           margin-top: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.1);
         }
 
         .instructions-box h4 {
           margin-bottom: 15px;
           font-size: 1.1em;
+          color: #00d9ff;
+          font-weight: 700;
         }
 
         .instructions-box ol {
           margin-left: 20px;
           line-height: 1.8;
+          color: #b0b0b0;
         }
 
         .instructions-box li {
@@ -227,17 +271,19 @@ export default function RTMPCredentials() {
         }
 
         .warning {
-          background: rgba(255, 152, 0, 0.2);
+          background: rgba(255, 152, 0, 0.15);
           border-left: 4px solid #ff9800;
           padding: 15px;
-          border-radius: 8px;
+          border-radius: 10px;
           margin-top: 20px;
           font-size: 0.95em;
+          border: 2px solid rgba(255, 152, 0, 0.3);
         }
 
         .warning strong {
           display: block;
           margin-bottom: 5px;
+          color: #ff9800;
         }
 
         @media (max-width: 768px) {

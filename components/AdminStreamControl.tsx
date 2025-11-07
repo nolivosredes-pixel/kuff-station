@@ -427,10 +427,14 @@ export default function AdminStreamControl() {
     <div className="admin-stream-control">
       <style jsx>{`
         .admin-stream-control {
-          background: #1a1a2e;
-          border-radius: 15px;
+          background: rgba(26, 26, 26, 0.8);
+          backdrop-filter: blur(10px);
+          border-radius: 20px;
           padding: 25px;
           color: white;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.1);
+          font-family: 'Montserrat', sans-serif;
         }
 
         .header {
@@ -442,35 +446,51 @@ export default function AdminStreamControl() {
 
         .title {
           font-size: 1.8em;
-          font-weight: bold;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          background: linear-gradient(135deg, #ffffff 0%, #00d9ff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .status-badge {
-          padding: 8px 20px;
-          border-radius: 20px;
+          padding: 10px 25px;
+          border-radius: 50px;
           font-weight: bold;
           font-size: 0.9em;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .status-badge.live {
           background: #ff0000;
-          animation: pulse 2s infinite;
+          animation: livePulse 2s infinite;
+          box-shadow: 0 5px 25px rgba(255, 0, 0, 0.6);
         }
 
         .status-badge.offline {
-          background: #666;
+          background: rgba(176, 176, 176, 0.2);
+          color: #b0b0b0;
+          border: 2px solid rgba(176, 176, 176, 0.3);
         }
 
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
+        @keyframes livePulse {
+          0%, 100% {
+            box-shadow: 0 5px 25px rgba(255, 0, 0, 0.6);
+          }
+          50% {
+            box-shadow: 0 8px 35px rgba(255, 0, 0, 0.8);
+          }
         }
 
         .canvas-container {
           background: #000;
-          border-radius: 10px;
+          border-radius: 15px;
           overflow: hidden;
           margin-bottom: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
         }
 
         canvas {
@@ -489,54 +509,78 @@ export default function AdminStreamControl() {
         .btn {
           padding: 12px 20px;
           border: none;
-          border-radius: 8px;
-          font-weight: bold;
+          border-radius: 50px;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.3s;
           font-size: 0.9em;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .btn-primary {
-          background: #51cf66;
-          color: white;
+          background: #00d9ff;
+          color: #000000;
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
         }
 
         .btn-primary:hover {
-          background: #40c057;
+          background: #00ffff;
+          transform: translateY(-3px);
+          box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5);
         }
 
         .btn-danger {
-          background: #ff6b6b;
+          background: #ff4444;
           color: white;
+          box-shadow: 0 10px 30px rgba(255, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+          background: #ff0000;
+          transform: translateY(-3px);
+          box-shadow: 0 15px 40px rgba(255, 68, 68, 0.5);
         }
 
         .btn-secondary {
-          background: rgba(255, 255, 255, 0.1);
-          color: white;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: transparent;
+          color: #00d9ff;
+          border: 2px solid #00d9ff;
+        }
+
+        .btn-secondary:hover {
+          background: #00d9ff;
+          color: #000000;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
         }
 
         .stats {
           display: flex;
           gap: 20px;
           padding: 15px;
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 15px;
+          border: 2px solid rgba(0, 217, 255, 0.15);
         }
 
         .stat {
           text-align: center;
+          flex: 1;
         }
 
         .stat-label {
           font-size: 0.9em;
-          opacity: 0.7;
+          color: #808080;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .stat-value {
           font-size: 1.5em;
           font-weight: bold;
           margin-top: 5px;
+          color: #00d9ff;
         }
 
         /* Modal */
@@ -546,7 +590,8 @@ export default function AdminStreamControl() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.8);
+          background: rgba(0, 0, 0, 0.85);
+          backdrop-filter: blur(10px);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -554,19 +599,24 @@ export default function AdminStreamControl() {
         }
 
         .modal-content {
-          background: #1a1a2e;
+          background: rgba(26, 26, 26, 0.95);
           padding: 30px;
-          border-radius: 15px;
+          border-radius: 20px;
           max-width: 500px;
           width: 90%;
           max-height: 90vh;
           overflow-y: auto;
+          border: 2px solid rgba(0, 217, 255, 0.3);
+          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.2);
         }
 
         .modal-header {
           font-size: 1.5em;
-          font-weight: bold;
+          font-weight: 700;
           margin-bottom: 20px;
+          color: #00d9ff;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .form-group {
@@ -576,20 +626,33 @@ export default function AdminStreamControl() {
         .form-group label {
           display: block;
           margin-bottom: 8px;
-          font-weight: bold;
+          font-weight: 600;
           font-size: 0.9em;
+          color: #b0b0b0;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
           width: 100%;
-          padding: 10px;
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.05);
+          padding: 12px 15px;
+          border: 2px solid rgba(0, 217, 255, 0.3);
+          border-radius: 10px;
+          background: #000000;
           color: white;
           font-size: 14px;
+          transition: all 0.3s;
+          font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+          outline: none;
+          border-color: #00d9ff;
+          box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
         }
 
         .form-group textarea {
@@ -606,8 +669,9 @@ export default function AdminStreamControl() {
 
         .help-text {
           font-size: 0.85em;
-          opacity: 0.7;
+          color: #808080;
           margin-top: 5px;
+          font-style: italic;
         }
       `}</style>
 

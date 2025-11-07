@@ -137,26 +137,142 @@ export default function AdminPanel() {
     : 'bg-red-500/20 border border-red-500 text-red-500';
 
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Image src="/assets/images/kuff-white.png" alt="KUFF" width={60} height={60} />
-            <div>
-              <h1 className="text-3xl font-bold text-cyan-500">Panel de Administración</h1>
-              <p className="text-gray-400">Gestión de Eventos KUFF</p>
+    <div className="admin-page">
+      <style jsx>{`
+        .admin-page {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000814 100%);
+          padding: 20px;
+          font-family: 'Montserrat', sans-serif;
+          position: relative;
+        }
+
+        .admin-page::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background:
+            radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(0, 153, 204, 0.05) 0%, transparent 50%);
+          animation: bgPulse 8s ease-in-out infinite;
+          z-index: 0;
+        }
+
+        @keyframes bgPulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+
+        .admin-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          position: relative;
+          z-index: 1;
+        }
+
+        .admin-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 40px;
+          padding: 20px;
+          background: rgba(26, 26, 26, 0.6);
+          backdrop-filter: blur(10px);
+          border-radius: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .header-content {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .logo-wrapper {
+          filter: drop-shadow(0 0 20px rgba(0, 217, 255, 0.5));
+        }
+
+        .header-text h1 {
+          font-size: 2rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          background: linear-gradient(135deg, #ffffff 0%, #00d9ff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 5px;
+        }
+
+        .header-text p {
+          color: #b0b0b0;
+          font-size: 1rem;
+        }
+
+        .logout-btn {
+          background: #ff4444;
+          color: white;
+          padding: 12px 24px;
+          border: none;
+          border-radius: 50px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          box-shadow: 0 10px 30px rgba(255, 68, 68, 0.3);
+        }
+
+        .logout-btn:hover {
+          background: #ff0000;
+          transform: translateY(-3px);
+          box-shadow: 0 15px 40px rgba(255, 68, 68, 0.5);
+        }
+
+        .message {
+          padding: 15px 20px;
+          border-radius: 15px;
+          margin-bottom: 25px;
+          font-weight: 600;
+          animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+
+      <div className="admin-container">
+        <div className="admin-header">
+          <div className="header-content">
+            <div className="logo-wrapper">
+              <Image src="/assets/images/kuff-white.png" alt="KUFF" width={60} height={60} />
+            </div>
+            <div className="header-text">
+              <h1>Panel de Administración</h1>
+              <p>Gestión de Eventos KUFF</p>
             </div>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
+            className="logout-btn"
           >
             Cerrar Sesión
           </button>
         </div>
 
         {message.text && (
-          <div className={`p-4 rounded-lg mb-6 ${msgClass}`}>
+          <div className={`message ${msgClass}`}>
             {message.text}
           </div>
         )}
