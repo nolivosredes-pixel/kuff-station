@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Event } from "@/lib/types";
 import QuickStreamControl from "@/components/QuickStreamControl";
 import RTMPCredentials from "@/components/RTMPCredentials";
+import GoogleDriveSetup from "@/components/GoogleDriveSetup";
 import AdminStreamControl from "@/components/AdminStreamControl";
 
 export default function AdminPanel() {
@@ -168,6 +169,11 @@ export default function AdminPanel() {
         {/* RTMP Credentials for Production */}
         <div className="mb-8">
           <RTMPCredentials />
+        </div>
+
+        {/* Google Drive Auto-Upload */}
+        <div className="mb-8">
+          <GoogleDriveSetup />
         </div>
 
         {/* Advanced Streaming Control (Own Stream with OBS) */}
