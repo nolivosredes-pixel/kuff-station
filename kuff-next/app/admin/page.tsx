@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import Image from "next/image";
 import { Event } from "@/lib/types";
 import QuickStreamControl from "@/components/QuickStreamControl";
+import RTMPCredentials from "@/components/RTMPCredentials";
 import AdminStreamControl from "@/components/AdminStreamControl";
 
 export default function AdminPanel() {
@@ -162,6 +163,11 @@ export default function AdminPanel() {
         {/* Quick Stream Control */}
         <div className="mb-8">
           <QuickStreamControl />
+        </div>
+
+        {/* RTMP Credentials for Production */}
+        <div className="mb-8">
+          <RTMPCredentials />
         </div>
 
         {/* Advanced Streaming Control (Own Stream with OBS) */}
