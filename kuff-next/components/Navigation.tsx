@@ -59,6 +59,11 @@ export default function Navigation() {
             </Link>
           </li>
           <li>
+            <Link href="#live" className="nav-link" onClick={closeMenu}>
+              Live
+            </Link>
+          </li>
+          <li>
             <Link href="#tour" className="nav-link" onClick={closeMenu}>
               Events
             </Link>

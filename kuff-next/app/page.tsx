@@ -6,6 +6,7 @@ import EventsSection from "@/components/EventsSection";
 import Navigation from "@/components/Navigation";
 import GallerySection from "@/components/GallerySection";
 import FallingIcons from "@/components/FallingIcons";
+import LiveStream from "@/components/LiveStream";
 
 export default function Home() {
   return (
@@ -244,6 +245,17 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Live Stream Section */}
+      <section id="live" className="live-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Live Stream</h2>
+            <div className="title-underline"></div>
+          </div>
+          <LiveStream />
         </div>
       </section>
 

@@ -2192,3 +2192,47 @@ body {
 a, button, .btn, .platform-card, .stat-item, .location-group, .social-icon {
     transition: all var(--transition-speed) ease;
 }
+
+/* Live Stream Section */
+.live-section {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.live-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.live-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+.live-section .section-header {
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.live-section .section-title {
+    color: white;
+    font-size: 3em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+}
