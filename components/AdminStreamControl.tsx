@@ -2,223 +2,53 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-interface StreamConfig {
-  platform: string;
-  streamKey: string;
-  bitrate: number;
-}
-
-interface StreamingStatus {
-  isLive: boolean;
-  platform: string | null;
-  streamUrl: string | null;
-  embedUrl: string | null;
-  startedAt: string | null;
-  title: string;
-  description: string;
-}
-
 interface Source {
   id: string;
-  type: 'camera' | 'screen' | 'text';
+  type: 'camera' | 'screen';
   name: string;
   visible: boolean;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  video?: HTMLVideoElement;
   stream?: MediaStream;
-  text?: string;
-  color?: string;
-  fontSize?: number;
 }
 
-const PLATFORM_CONFIG: Record<string, { rtmpUrl: string; embedBaseUrl: string; streamBaseUrl: string }> = {
-  youtube: {
-    rtmpUrl: 'rtmp://a.rtmp.youtube.com/live2',
-    embedBaseUrl: 'https://www.youtube.com/embed/',
-    streamBaseUrl: 'https://www.youtube.com/watch?v=',
-  },
-  twitch: {
-    rtmpUrl: 'rtmp://live.twitch.tv/app',
-    embedBaseUrl: 'https://player.twitch.tv/?channel=',
-    streamBaseUrl: 'https://www.twitch.tv/',
-  },
-  facebook: {
-    rtmpUrl: 'rtmps://live-api-s.facebook.com:443/rtmp',
-    embedBaseUrl: 'https://www.facebook.com/plugins/video.php?href=',
-    streamBaseUrl: 'https://www.facebook.com/',
-  },
-};
-
 export default function AdminStreamControl() {
-  // Canvas and rendering
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-
-  // State
+  const [sources, setSources] = useState<Source[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [sources, setSources] = useState<Map<string, Source>>(new Map());
-  const [streamingStatus, setStreamingStatus] = useState<StreamingStatus | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioCanvasRef = useRef<HTMLCanvasElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationIdRef = useRef<number | null>(null);
 
-  // Streaming
-  const streamingWsRef = useRef<WebSocket | null>(null);
-  const streamRecorderRef = useRef<MediaRecorder | null>(null);
-  const [showConfigModal, setShowConfigModal] = useState(false);
-
-  // Config form
-  const [platform, setPlatform] = useState('youtube');
-  const [streamKey, setStreamKey] = useState('');
-  const [channelId, setChannelId] = useState(''); // For embeds
-  const [bitrate, setBitrate] = useState(2500);
-  const [streamTitle, setStreamTitle] = useState('KUFF Live Performance');
-  const [streamDescription, setStreamDescription] = useState('Watch KUFF perform live!');
-
-  // Stats
-  const [fps, setFps] = useState(0);
-  const statsRef = useRef({ fps: 0, frames: 0, lastFrameTime: 0 });
-
-  const CANVAS_WIDTH = 1920;
-  const CANVAS_HEIGHT = 1080;
-  const TARGET_FPS = 30;
-
-  // Initialize canvas
+  // Cleanup on unmount
   useEffect(() => {
-    if (!canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
-    ctxRef.current = canvas.getContext('2d');
-
-    startRenderLoop();
-
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      stopAllStreams();
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
       }
-      sources.forEach(source => {
-        if (source.stream) {
-          source.stream.getTracks().forEach(track => track.stop());
-        }
-      });
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
     };
   }, []);
 
-  // Fetch current status
-  useEffect(() => {
-    fetchStreamingStatus();
-  }, []);
-
-  const fetchStreamingStatus = async () => {
-    try {
-      const response = await fetch('/api/streaming/status');
-      const data = await response.json();
-      setStreamingStatus(data);
-      setIsStreaming(data.isLive);
-    } catch (error) {
-      console.error('Error fetching streaming status:', error);
-    }
-  };
-
-  const startRenderLoop = () => {
-    const targetInterval = 1000 / TARGET_FPS;
-    let lastTime = performance.now();
-
-    const render = (currentTime: number) => {
-      animationFrameRef.current = requestAnimationFrame(render);
-
-      const elapsed = currentTime - lastTime;
-
-      if (elapsed >= targetInterval) {
-        lastTime = currentTime - (elapsed % targetInterval);
-        renderFrame();
-        updateStats();
-      }
-    };
-
-    animationFrameRef.current = requestAnimationFrame(render);
-  };
-
-  const renderFrame = () => {
-    if (!ctxRef.current || !canvasRef.current) return;
-
-    const ctx = ctxRef.current;
-
-    // Clear canvas
-    ctx.fillStyle = '#1a1a2e';
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // Render sources
+  const stopAllStreams = () => {
     sources.forEach(source => {
-      if (source.visible) {
-        renderSource(ctx, source);
+      if (source.stream) {
+        source.stream.getTracks().forEach(track => track.stop());
       }
     });
-
-    // Draw LIVE indicator if streaming
-    if (isStreaming) {
-      ctx.save();
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-      ctx.fillRect(20, 20, 120, 50);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 24px Arial';
-      ctx.fillText('LIVE', 50, 53);
-      ctx.restore();
-    }
-
-    statsRef.current.frames++;
-  };
-
-  const renderSource = (ctx: CanvasRenderingContext2D, source: Source) => {
-    ctx.save();
-
-    try {
-      if (source.type === 'camera' || source.type === 'screen') {
-        if (source.video && source.video.readyState >= 2) {
-          ctx.drawImage(source.video, source.x, source.y, source.width, source.height);
-          ctx.strokeStyle = '#9147ff';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(source.x, source.y, source.width, source.height);
-        }
-      } else if (source.type === 'text') {
-        ctx.fillStyle = source.color || '#ffffff';
-        ctx.font = `${source.fontSize || 72}px Arial`;
-        ctx.textBaseline = 'top';
-        ctx.fillText(source.text || '', source.x + 10, source.y + 10);
-      }
-    } catch (error) {
-      console.error('Error rendering source:', error);
-    }
-
-    ctx.restore();
-  };
-
-  const updateStats = () => {
-    const now = performance.now();
-
-    if (statsRef.current.lastFrameTime === 0) {
-      statsRef.current.lastFrameTime = now;
-      return;
-    }
-
-    const delta = now - statsRef.current.lastFrameTime;
-    statsRef.current.fps = Math.round(1000 / delta);
-    statsRef.current.lastFrameTime = now;
-
-    setFps(statsRef.current.fps);
   };
 
   const addCameraSource = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.autoplay = true;
-      video.muted = true;
-      await video.play();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: true
+      });
 
       const sourceId = `camera-${Date.now()}`;
       const newSource: Source = {
@@ -226,201 +56,172 @@ export default function AdminStreamControl() {
         type: 'camera',
         name: 'Camera',
         visible: true,
-        x: 100,
-        y: 100,
-        width: 640,
-        height: 360,
-        video,
         stream,
       };
 
-      setSources(prev => new Map(prev).set(sourceId, newSource));
-    } catch (error) {
+      setSources(prev => [...prev, newSource]);
+
+      // Set video preview
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+
+      // Setup audio visualization
+      setupAudioVisualization(stream);
+
+      alert('✅ Cámara agregada! Preview activo.');
+    } catch (error: any) {
       console.error('Error adding camera:', error);
-      alert('Error accessing camera');
+      alert('❌ Error al acceder a la cámara: ' + error.message);
     }
   };
 
   const addScreenSource = async () => {
     try {
       const stream = await (navigator.mediaDevices as any).getDisplayMedia({
-        video: { mediaSource: 'screen' },
+        video: {
+          cursor: 'always',
+          displaySurface: 'monitor'
+        },
         audio: true
       });
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.autoplay = true;
-      video.muted = true;
-      await video.play();
 
       const sourceId = `screen-${Date.now()}`;
       const newSource: Source = {
         id: sourceId,
         type: 'screen',
-        name: 'Screen',
+        name: 'Screen Share',
         visible: true,
-        x: 0,
-        y: 0,
-        width: CANVAS_WIDTH,
-        height: CANVAS_HEIGHT,
-        video,
         stream,
       };
 
-      setSources(prev => new Map(prev).set(sourceId, newSource));
-    } catch (error) {
-      console.error('Error adding screen:', error);
-      alert('Error accessing screen');
-    }
-  };
+      setSources(prev => [...prev, newSource]);
 
-  const addTextSource = () => {
-    const text = prompt('Enter text:');
-    if (!text) return;
-
-    const sourceId = `text-${Date.now()}`;
-    const newSource: Source = {
-      id: sourceId,
-      type: 'text',
-      name: 'Text',
-      visible: true,
-      x: 100,
-      y: 900,
-      width: 400,
-      height: 100,
-      text,
-      color: '#ffffff',
-      fontSize: 72,
-    };
-
-    setSources(prev => new Map(prev).set(sourceId, newSource));
-  };
-
-  const updateStreamingStatus = async (isLive: boolean, config?: any) => {
-    try {
-      const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'afro2025';
-      const response = await fetch('/api/streaming/status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminPassword}`,
-        },
-        body: JSON.stringify({
-          isLive,
-          ...config,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update status');
+      // Set video preview
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
       }
 
-      const data = await response.json();
-      setStreamingStatus(data);
-    } catch (error) {
-      console.error('Error updating streaming status:', error);
+      // Setup audio visualization if available
+      setupAudioVisualization(stream);
+
+      alert('✅ Pantalla compartida agregada! Preview activo.');
+    } catch (error: any) {
+      console.error('Error adding screen:', error);
+      alert('❌ Error al compartir pantalla: ' + error.message);
     }
   };
 
-  const startStreaming = async () => {
-    if (!streamKey || !channelId) {
-      alert('Please configure stream settings first');
-      setShowConfigModal(true);
+  const setupAudioVisualization = (stream: MediaStream) => {
+    try {
+      const audioTracks = stream.getAudioTracks();
+      if (audioTracks.length === 0) {
+        console.log('No audio tracks available');
+        return;
+      }
+
+      // Close previous audio context if exists
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(stream);
+
+      analyser.fftSize = 256;
+      source.connect(analyser);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+
+      visualizeAudio();
+    } catch (error) {
+      console.error('Error setting up audio visualization:', error);
+    }
+  };
+
+  const visualizeAudio = () => {
+    if (!analyserRef.current || !audioCanvasRef.current) return;
+
+    const canvas = audioCanvasRef.current;
+    const canvasCtx = canvas.getContext('2d');
+    if (!canvasCtx) return;
+
+    const analyser = analyserRef.current;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const draw = () => {
+      animationIdRef.current = requestAnimationFrame(draw);
+
+      analyser.getByteFrequencyData(dataArray);
+
+      canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let barHeight;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] / 255) * canvas.height;
+
+        // Cyan gradient
+        const gradient = canvasCtx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+        gradient.addColorStop(0, '#00ffff');
+        gradient.addColorStop(1, '#00d9ff');
+
+        canvasCtx.fillStyle = gradient;
+        canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+        x += barWidth + 1;
+      }
+    };
+
+    draw();
+  };
+
+  const removeSource = (sourceId: string) => {
+    const source = sources.find(s => s.id === sourceId);
+    if (source?.stream) {
+      source.stream.getTracks().forEach(track => track.stop());
+    }
+
+    setSources(prev => prev.filter(s => s.id !== sourceId));
+
+    // Clear video if no sources left
+    if (sources.length === 1 && videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
+    alert('✅ Source eliminada');
+  };
+
+  const goLive = () => {
+    if (sources.length === 0) {
+      alert('⚠️ Agrega al menos una fuente (cámara o pantalla) antes de ir en vivo');
       return;
     }
 
-    if (!canvasRef.current) return;
-
-    try {
-      // Connect to streaming server
-      const wsUrl = 'ws://localhost:9000';
-      streamingWsRef.current = new WebSocket(wsUrl);
-
-      await new Promise((resolve, reject) => {
-        if (!streamingWsRef.current) return reject(new Error('WebSocket not initialized'));
-
-        streamingWsRef.current.onopen = () => {
-          console.log('Connected to streaming server');
-
-          const config = PLATFORM_CONFIG[platform];
-          streamingWsRef.current?.send(JSON.stringify({
-            type: 'config',
-            platform,
-            rtmpUrl: config.rtmpUrl,
-            streamKey,
-            fps: TARGET_FPS,
-            bitrate,
-          }));
-
-          const configHandler = (event: MessageEvent) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'config_received') {
-              streamingWsRef.current?.removeEventListener('message', configHandler);
-              streamingWsRef.current?.send(JSON.stringify({ type: 'start_stream' }));
-              resolve(true);
-            }
-          };
-
-          streamingWsRef.current?.addEventListener('message', configHandler);
-        };
-
-        streamingWsRef.current.onerror = reject;
-      });
-
-      // Start capturing canvas
-      const stream = canvasRef.current.captureStream(TARGET_FPS);
-
-      streamRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp8',
-        videoBitsPerSecond: bitrate * 1000,
-      });
-
-      streamRecorderRef.current.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0 &&
-            streamingWsRef.current &&
-            streamingWsRef.current.readyState === WebSocket.OPEN) {
-          streamingWsRef.current.send(event.data);
-        }
-      };
-
-      streamRecorderRef.current.start(100);
-      setIsStreaming(true);
-
-      // Update public status
-      const config = PLATFORM_CONFIG[platform];
-      await updateStreamingStatus(true, {
-        platform,
-        streamUrl: `${config.streamBaseUrl}${channelId}`,
-        embedUrl: `${config.embedBaseUrl}${channelId}`,
-        title: streamTitle,
-        description: streamDescription,
-      });
-
-      console.log('Streaming started');
-    } catch (error: any) {
-      console.error('Error starting stream:', error);
-      alert(`Failed to start streaming: ${error.message}`);
-    }
+    setIsStreaming(true);
+    alert('✅ Simulación: LIVE activado!\n\nEn producción, esto enviaría el stream al servidor RTMP.');
   };
 
-  const stopStreaming = async () => {
-    if (streamRecorderRef.current) {
-      streamRecorderRef.current.stop();
-      streamRecorderRef.current = null;
-    }
-
-    if (streamingWsRef.current) {
-      streamingWsRef.current.send(JSON.stringify({ type: 'stop_stream' }));
-      streamingWsRef.current.close();
-      streamingWsRef.current = null;
-    }
-
+  const stopStream = () => {
     setIsStreaming(false);
+    stopAllStreams();
+    setSources([]);
 
-    // Update public status
-    await updateStreamingStatus(false);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
 
-    console.log('Streaming stopped');
+    if (animationIdRef.current) {
+      cancelAnimationFrame(animationIdRef.current);
+    }
+
+    alert('✅ Stream detenido');
   };
 
   return (
@@ -485,18 +286,54 @@ export default function AdminStreamControl() {
           }
         }
 
-        .canvas-container {
-          background: #000;
-          border-radius: 15px;
-          overflow: hidden;
-          margin-bottom: 20px;
-          border: 2px solid rgba(0, 217, 255, 0.2);
+        .preview-section {
+          margin-bottom: 25px;
         }
 
-        canvas {
+        .preview-label {
+          font-size: 1em;
+          font-weight: 600;
+          color: #00d9ff;
+          margin-bottom: 10px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .video-preview {
           width: 100%;
-          height: auto;
+          max-height: 500px;
+          background: #000;
+          border-radius: 15px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          overflow: hidden;
+        }
+
+        .video-preview video {
+          width: 100%;
+          height: 100%;
           display: block;
+        }
+
+        .no-preview {
+          width: 100%;
+          height: 300px;
+          background: #000;
+          border-radius: 15px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #666;
+          font-size: 1.2em;
+        }
+
+        .audio-visualization {
+          width: 100%;
+          height: 120px;
+          background: #000;
+          border-radius: 15px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          margin-top: 15px;
         }
 
         .controls {
@@ -555,123 +392,82 @@ export default function AdminStreamControl() {
           box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
         }
 
-        .stats {
-          display: flex;
-          gap: 20px;
-          padding: 15px;
+        .sources-list {
           background: rgba(0, 0, 0, 0.3);
           border-radius: 15px;
+          padding: 20px;
+          margin-bottom: 20px;
           border: 2px solid rgba(0, 217, 255, 0.15);
         }
 
-        .stat {
-          text-align: center;
-          flex: 1;
-        }
-
-        .stat-label {
-          font-size: 0.9em;
-          color: #808080;
+        .sources-list h3 {
+          color: #00d9ff;
+          margin-bottom: 15px;
+          font-size: 1.1em;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
 
-        .stat-value {
-          font-size: 1.5em;
-          font-weight: bold;
-          margin-top: 5px;
-          color: #00d9ff;
+        .source-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 12px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 10px;
+          margin-bottom: 10px;
+          border: 1px solid rgba(0, 217, 255, 0.15);
         }
 
-        /* Modal */
-        .modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.85);
-          backdrop-filter: blur(10px);
+        .source-info {
           display: flex;
           align-items: center;
-          justify-content: center;
-          z-index: 1000;
-        }
-
-        .modal-content {
-          background: rgba(26, 26, 26, 0.95);
-          padding: 30px;
-          border-radius: 20px;
-          max-width: 500px;
-          width: 90%;
-          max-height: 90vh;
-          overflow-y: auto;
-          border: 2px solid rgba(0, 217, 255, 0.3);
-          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.2);
-        }
-
-        .modal-header {
-          font-size: 1.5em;
-          font-weight: 700;
-          margin-bottom: 20px;
-          color: #00d9ff;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        .form-group {
-          margin-bottom: 20px;
-        }
-
-        .form-group label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: 600;
-          font-size: 0.9em;
-          color: #b0b0b0;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-          width: 100%;
-          padding: 12px 15px;
-          border: 2px solid rgba(0, 217, 255, 0.3);
-          border-radius: 10px;
-          background: #000000;
-          color: white;
-          font-size: 14px;
-          transition: all 0.3s;
-          font-family: 'Montserrat', sans-serif;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-          outline: none;
-          border-color: #00d9ff;
-          box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
-        }
-
-        .form-group textarea {
-          min-height: 80px;
-          resize: vertical;
-        }
-
-        .modal-buttons {
-          display: flex;
           gap: 10px;
-          justify-content: flex-end;
-          margin-top: 20px;
         }
 
-        .help-text {
+        .source-icon {
+          font-size: 1.5em;
+        }
+
+        .source-name {
+          font-weight: 600;
+          color: #fff;
+        }
+
+        .source-type {
           font-size: 0.85em;
           color: #808080;
-          margin-top: 5px;
-          font-style: italic;
+        }
+
+        .btn-remove {
+          padding: 6px 15px;
+          background: #ff4444;
+          color: white;
+          border: none;
+          border-radius: 50px;
+          cursor: pointer;
+          font-size: 0.85em;
+          font-weight: 700;
+          transition: all 0.3s;
+        }
+
+        .btn-remove:hover {
+          background: #ff0000;
+          transform: scale(1.05);
+        }
+
+        .info-box {
+          background: rgba(0, 217, 255, 0.1);
+          border-left: 4px solid #00d9ff;
+          padding: 15px;
+          border-radius: 10px;
+          margin-bottom: 20px;
+        }
+
+        .info-box p {
+          color: #b0b0b0;
+          line-height: 1.6;
+          margin: 0;
         }
       `}</style>
 
@@ -682,142 +478,75 @@ export default function AdminStreamControl() {
         </div>
       </div>
 
-      <div className="canvas-container">
-        <canvas ref={canvasRef} />
+      <div className="info-box">
+        <p>
+          <strong>📹 Sistema de Streaming con Preview en Vivo</strong><br />
+          Agrega tu cámara o comparte tu pantalla para ver el preview. La visualización de audio muestra el nivel en tiempo real.
+        </p>
+      </div>
+
+      <div className="preview-section">
+        <div className="preview-label">🎥 Video Preview</div>
+        {sources.length > 0 ? (
+          <div className="video-preview">
+            <video ref={videoRef} autoPlay playsInline muted />
+          </div>
+        ) : (
+          <div className="no-preview">
+            Agrega una fuente para ver el preview
+          </div>
+        )}
+
+        <div className="preview-label" style={{ marginTop: '20px' }}>🎵 Audio Visualization</div>
+        <canvas ref={audioCanvasRef} className="audio-visualization" width="800" height="120" />
       </div>
 
       <div className="controls">
-        <button className="btn btn-secondary" onClick={addCameraSource}>
+        <button className="btn btn-secondary" onClick={addCameraSource} disabled={isStreaming}>
           📷 Add Camera
         </button>
-        <button className="btn btn-secondary" onClick={addScreenSource}>
+        <button className="btn btn-secondary" onClick={addScreenSource} disabled={isStreaming}>
           🖥️ Add Screen
         </button>
-        <button className="btn btn-secondary" onClick={addTextSource}>
-          📝 Add Text
-        </button>
-        <button className="btn btn-secondary" onClick={() => setShowConfigModal(true)}>
-          ⚙️ Settings
-        </button>
       </div>
+
+      {sources.length > 0 && (
+        <div className="sources-list">
+          <h3>📋 Active Sources</h3>
+          {sources.map(source => (
+            <div key={source.id} className="source-item">
+              <div className="source-info">
+                <span className="source-icon">
+                  {source.type === 'camera' ? '📷' : '🖥️'}
+                </span>
+                <div>
+                  <div className="source-name">{source.name}</div>
+                  <div className="source-type">{source.type}</div>
+                </div>
+              </div>
+              <button
+                className="btn-remove"
+                onClick={() => removeSource(source.id)}
+                disabled={isStreaming}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="controls">
         {!isStreaming ? (
-          <button className="btn btn-primary" onClick={startStreaming}>
+          <button className="btn btn-primary" onClick={goLive}>
             ▶️ Go Live
           </button>
         ) : (
-          <button className="btn btn-danger" onClick={stopStreaming}>
+          <button className="btn btn-danger" onClick={stopStream}>
             ⏹️ Stop Stream
           </button>
         )}
       </div>
-
-      <div className="stats">
-        <div className="stat">
-          <div className="stat-label">FPS</div>
-          <div className="stat-value">{fps}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-label">Sources</div>
-          <div className="stat-value">{sources.size}</div>
-        </div>
-        <div className="stat">
-          <div className="stat-label">Status</div>
-          <div className="stat-value">{isStreaming ? '🔴' : '⚫'}</div>
-        </div>
-      </div>
-
-      {showConfigModal && (
-        <div className="modal" onClick={() => setShowConfigModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">Stream Configuration</div>
-
-            <div className="form-group">
-              <label>Platform</label>
-              <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
-                <option value="youtube">YouTube</option>
-                <option value="twitch">Twitch</option>
-                <option value="facebook">Facebook</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Stream Key</label>
-              <input
-                type="password"
-                value={streamKey}
-                onChange={(e) => setStreamKey(e.target.value)}
-                placeholder="Enter your stream key"
-              />
-              <div className="help-text">
-                Get this from your {platform} dashboard
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Channel ID / Username</label>
-              <input
-                type="text"
-                value={channelId}
-                onChange={(e) => setChannelId(e.target.value)}
-                placeholder={platform === 'youtube' ? 'Video ID' : 'Channel name'}
-              />
-              <div className="help-text">
-                Used for embedding the stream on the public page
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Stream Title</label>
-              <input
-                type="text"
-                value={streamTitle}
-                onChange={(e) => setStreamTitle(e.target.value)}
-                placeholder="Stream title"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Stream Description</label>
-              <textarea
-                value={streamDescription}
-                onChange={(e) => setStreamDescription(e.target.value)}
-                placeholder="Describe your stream"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Bitrate (kbps)</label>
-              <input
-                type="number"
-                value={bitrate}
-                onChange={(e) => setBitrate(Number(e.target.value))}
-                min="500"
-                max="8000"
-              />
-              <div className="help-text">
-                Recommended: 2500 kbps
-              </div>
-            </div>
-
-            <div className="modal-buttons">
-              <button className="btn btn-secondary" onClick={() => setShowConfigModal(false)}>
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  setShowConfigModal(false);
-                  alert('Configuration saved!');
-                }}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
