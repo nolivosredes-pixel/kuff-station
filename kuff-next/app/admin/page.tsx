@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import { Event } from "@/lib/types";
+import QuickStreamControl from "@/components/QuickStreamControl";
 import AdminStreamControl from "@/components/AdminStreamControl";
 
 export default function AdminPanel() {
@@ -158,10 +159,20 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {/* Live Streaming Control */}
+        {/* Quick Stream Control */}
         <div className="mb-8">
-          <AdminStreamControl />
+          <QuickStreamControl />
         </div>
+
+        {/* Advanced Streaming Control (Own Stream with OBS) */}
+        <details className="mb-8">
+          <summary className="cursor-pointer text-xl font-bold text-cyan-500 mb-4 hover:text-cyan-400 transition-colors">
+            🎬 Advanced Mode: Own Stream with OBS (Click to expand)
+          </summary>
+          <div className="mt-4">
+            <AdminStreamControl />
+          </div>
+        </details>
 
         <div className="bg-gray-900 p-6 rounded-lg border-2 border-cyan-500/20 mb-8">
           <h2 className="text-2xl font-bold mb-6 text-cyan-500">
