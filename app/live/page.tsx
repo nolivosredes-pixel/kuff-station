@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+const HLSPlayer = dynamic(() => import('@/components/HLSPlayer'), {
+  ssr: false,
+});
 
 interface StreamingStatus {
   isLive: boolean;
@@ -12,6 +17,7 @@ interface StreamingStatus {
   startedAt: string | null;
   title: string;
   description: string;
+  streamType?: 'own' | 'external';
 }
 
 export default function LivePage() {
@@ -23,28 +29,60 @@ export default function LivePage() {
     startedAt: null,
     title: 'KUFF Live Stream',
     description: 'Watch KUFF perform live!',
+    streamType: 'own',
   });
   const [loading, setLoading] = useState(true);
+  const [ownStreamKey, setOwnStreamKey] = useState<string | null>(null);
+  const [ownStreamLive, setOwnStreamLive] = useState(false);
 
-  // Fetch streaming status
+  // Check for own RTMP stream key
+  useEffect(() => {
+    const savedKey = localStorage.getItem('kuff_stream_key');
+    if (savedKey) {
+      setOwnStreamKey(savedKey);
+    }
+    setLoading(false);
+  }, []);
+
+  // Fetch external streaming status (YouTube, Twitch, etc)
   const fetchStatus = async () => {
     try {
       const response = await fetch('/api/streaming/status');
       const data = await response.json();
-      setStatus(data);
-      setLoading(false);
+      // Only use external stream if no own stream is active
+      if (!ownStreamLive && data.isLive) {
+        setStatus({ ...data, streamType: 'external' });
+      }
     } catch (error) {
       console.error('Error fetching streaming status:', error);
-      setLoading(false);
     }
   };
 
-  // Poll for status updates every 5 seconds
+  // Poll for external status updates every 10 seconds
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 5000);
+    const interval = setInterval(fetchStatus, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [ownStreamLive]);
+
+  // Handler for own stream status
+  const handleOwnStreamStatus = (isLive: boolean) => {
+    setOwnStreamLive(isLive);
+    if (isLive) {
+      setStatus({
+        isLive: true,
+        platform: 'Own RTMP Server',
+        streamUrl: null,
+        embedUrl: null,
+        startedAt: new Date().toISOString(),
+        title: 'KUFF Live Stream',
+        description: 'Watch KUFF perform live via RTMP!',
+        streamType: 'own',
+      });
+    }
+  };
+
+  const isStreamActive = status.isLive || (ownStreamKey && ownStreamLive);
 
   if (loading) {
     return (
@@ -474,7 +512,7 @@ export default function LivePage() {
         <div className="shape"></div>
       </div>
 
-      {!status.isLive ? (
+      {!isStreamActive ? (
         /* OFFLINE STATE */
         <div className="offline-container">
           <div className="logo-container">
@@ -523,7 +561,14 @@ export default function LivePage() {
 
           <div className="stream-container">
             <div className="stream-wrapper">
-              {status.embedUrl ? (
+              {status.streamType === 'own' && ownStreamKey ? (
+                /* OWN RTMP STREAM */
+                <HLSPlayer
+                  streamKey={ownStreamKey}
+                  onStreamStatus={handleOwnStreamStatus}
+                />
+              ) : status.embedUrl ? (
+                /* EXTERNAL STREAM (YouTube, Twitch, etc) */
                 <iframe
                   src={status.embedUrl}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
