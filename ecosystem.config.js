@@ -1,39 +1,38 @@
 module.exports = {
   apps: [
     {
-      name: 'kuff-website',
-      script: 'npm',
+      name: 'kuff-next',
+      script: 'node_modules/next/dist/bin/next',
       args: 'start',
-      cwd: '/workspaces/kuff-station/kuff-next',
+      cwd: '/workspaces/kuff-station',
       instances: 1,
-      autorestart: true,
+      exec_mode: 'fork',
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: '500M',
       env: {
         NODE_ENV: 'production',
         PORT: 3000
       },
-      env_production: {
-        NODE_ENV: 'production',
-        PORT: 3000
-      }
+      error_file: './logs/next-error.log',
+      out_file: './logs/next-out.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true
     },
     {
-      name: 'streaming-server',
-      script: 'server/streaming-server.js',
-      cwd: '/workspaces/kuff-station/kuff-next',
+      name: 'rtmp-server',
+      script: 'server/rtmp-server.js',
+      cwd: '/workspaces/kuff-station',
       instances: 1,
-      autorestart: true,
+      exec_mode: 'fork',
       watch: false,
-      max_memory_restart: '512M',
+      max_memory_restart: '500M',
       env: {
-        NODE_ENV: 'production',
-        PORT: 9000
+        NODE_ENV: 'production'
       },
-      env_production: {
-        NODE_ENV: 'production',
-        PORT: 9000
-      }
+      error_file: './logs/rtmp-error.log',
+      out_file: './logs/rtmp-out.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true
     }
   ]
 };

@@ -8,11 +8,12 @@ export default function OwnRTMPServer() {
   const [copied, setCopied] = useState<'url' | 'key' | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // RTMP Server URL - Replace with your actual RTMP server
-  const RTMP_SERVER_URL = 'rtmp://kuffdj.net/live';
+  // RTMP Server URL - Dynamic based on environment
+  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+  const RTMP_SERVER_URL = isDev ? 'rtmp://localhost:1935/live' : 'rtmp://kuffdj.net:1935/live';
 
-  // HLS/WebRTC playback URL for /live page
-  const PLAYBACK_URL = 'https://kuffdj.net/live/stream.m3u8';
+  // HLS playback URL for /live page
+  const PLAYBACK_URL = isDev ? 'http://localhost:8000/live' : 'http://kuffdj.net:8000/live';
 
   useEffect(() => {
     // Load existing stream key from localStorage
