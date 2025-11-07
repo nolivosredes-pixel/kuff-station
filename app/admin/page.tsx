@@ -250,6 +250,299 @@ export default function AdminPanel() {
             transform: translateY(0);
           }
         }
+
+        /* Streaming sections */
+        .mb-8 {
+          margin-bottom: 2rem;
+        }
+
+        /* Advanced mode details */
+        details {
+          margin-bottom: 2rem;
+        }
+
+        details summary {
+          cursor: pointer;
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #00d9ff;
+          padding: 15px;
+          background: rgba(26, 26, 26, 0.6);
+          border-radius: 15px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          transition: all 0.3s;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        details summary:hover {
+          background: rgba(0, 217, 255, 0.1);
+          transform: translateY(-2px);
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
+        }
+
+        details[open] summary {
+          margin-bottom: 1rem;
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+
+        .mt-4 {
+          margin-top: 1rem;
+        }
+
+        /* Event form section */
+        .event-form-section {
+          background: rgba(26, 26, 26, 0.8);
+          backdrop-filter: blur(10px);
+          padding: 30px;
+          border-radius: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          margin-bottom: 2rem;
+          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.1);
+        }
+
+        .event-form-section h2 {
+          font-size: 1.75rem;
+          font-weight: 700;
+          margin-bottom: 30px;
+          color: #00d9ff;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        }
+
+        .event-form {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+          .event-form {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        .form-field {
+          margin-bottom: 0;
+        }
+
+        .form-field.full-width {
+          grid-column: 1 / -1;
+        }
+
+        .form-field label {
+          display: block;
+          margin-bottom: 8px;
+          color: #b0b0b0;
+          font-weight: 600;
+          font-size: 0.95rem;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .form-field input,
+        .form-field textarea {
+          width: 100%;
+          padding: 12px 15px;
+          background: #000000;
+          border: 2px solid rgba(0, 217, 255, 0.3);
+          border-radius: 10px;
+          color: white;
+          font-size: 1rem;
+          transition: all 0.3s;
+          font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-field input:focus,
+        .form-field textarea:focus {
+          outline: none;
+          border-color: #00d9ff;
+          box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+
+        .form-field input::placeholder {
+          color: #666;
+        }
+
+        .form-field textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
+
+        .form-field .help-text {
+          font-size: 0.85rem;
+          color: #808080;
+          margin-top: 5px;
+          font-style: italic;
+        }
+
+        .form-field .help-text a {
+          color: #00d9ff;
+          text-decoration: none;
+          transition: all 0.3s;
+        }
+
+        .form-field .help-text a:hover {
+          text-decoration: underline;
+          color: #00ffff;
+        }
+
+        .form-buttons {
+          display: flex;
+          gap: 15px;
+          grid-column: 1 / -1;
+          margin-top: 10px;
+        }
+
+        .form-buttons button {
+          flex: 1;
+          padding: 15px 30px;
+          border: none;
+          border-radius: 50px;
+          font-weight: 700;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.3s;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .btn-submit {
+          background: #00d9ff;
+          color: #000000;
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-submit:hover {
+          background: #00ffff;
+          transform: translateY(-3px);
+          box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5);
+        }
+
+        .btn-cancel {
+          background: transparent;
+          color: #808080;
+          border: 2px solid #808080;
+        }
+
+        .btn-cancel:hover {
+          background: #808080;
+          color: #000000;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 30px rgba(128, 128, 128, 0.3);
+        }
+
+        /* Events list section */
+        .events-list-section {
+          background: rgba(26, 26, 26, 0.8);
+          backdrop-filter: blur(10px);
+          padding: 30px;
+          border-radius: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.1);
+        }
+
+        .events-list-section h2 {
+          font-size: 1.75rem;
+          font-weight: 700;
+          margin-bottom: 30px;
+          color: #00d9ff;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        }
+
+        .events-grid {
+          display: grid;
+          gap: 20px;
+        }
+
+        .event-card {
+          background: #000000;
+          padding: 20px;
+          border-radius: 15px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          transition: all 0.3s;
+        }
+
+        .event-card:hover {
+          border-color: rgba(0, 217, 255, 0.5);
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
+          transform: translateY(-2px);
+        }
+
+        .event-info {
+          flex: 1;
+        }
+
+        .event-info h3 {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: white;
+          margin-bottom: 15px;
+        }
+
+        .event-details {
+          color: #b0b0b0;
+          line-height: 1.8;
+        }
+
+        .event-details p {
+          margin-bottom: 8px;
+          font-size: 0.95rem;
+        }
+
+        .event-actions {
+          display: flex;
+          gap: 10px;
+          margin-left: 20px;
+        }
+
+        .event-actions button {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 50px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-size: 0.9rem;
+        }
+
+        .btn-edit {
+          background: #00d9ff;
+          color: #000000;
+          box-shadow: 0 5px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-edit:hover {
+          background: #00ffff;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 217, 255, 0.5);
+        }
+
+        .btn-delete {
+          background: #ff4444;
+          color: white;
+          box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+        }
+
+        .btn-delete:hover {
+          background: #ff0000;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(255, 68, 68, 0.5);
+        }
+
+        .no-events {
+          text-align: center;
+          color: #808080;
+          padding: 40px 20px;
+          font-size: 1.1rem;
+        }
       `}</style>
 
       <div className="admin-container">
@@ -302,132 +595,122 @@ export default function AdminPanel() {
           </div>
         </details>
 
-        <div className="bg-gray-900 p-6 rounded-lg border-2 border-cyan-500/20 mb-8">
-          <h2 className="text-2xl font-bold mb-6 text-cyan-500">
+        <div className="event-form-section">
+          <h2>
             {editingId ? "Editar Evento" : "Agregar Nuevo Evento"}
           </h2>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-gray-300 mb-2">Título del Evento *</label>
+          <form onSubmit={handleSubmit} className="event-form">
+            <div className="form-field full-width">
+              <label>Título del Evento *</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-gray-300 mb-2">Fecha *</label>
+            <div className="form-field">
+              <label>Fecha *</label>
               <input
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-gray-300 mb-2">Hora *</label>
+            <div className="form-field">
+              <label>Hora *</label>
               <input
                 type="time"
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-gray-300 mb-2">Ciudad/País *</label>
+            <div className="form-field">
+              <label>Ciudad/País *</label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 required
                 placeholder="Miami, FL"
               />
             </div>
 
-            <div>
-              <label className="block text-gray-300 mb-2">Venue/Club *</label>
+            <div className="form-field">
+              <label>Venue/Club *</label>
               <input
                 type="text"
                 value={formData.venue}
                 onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 required
                 placeholder="Club Space"
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-gray-300 mb-2">Descripción *</label>
+            <div className="form-field full-width">
+              <label>Descripción *</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 rows={3}
                 required
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-gray-300 mb-2">URL del Flyer (PostImages.org) *</label>
+            <div className="form-field full-width">
+              <label>URL del Flyer (PostImages.org) *</label>
               <input
                 type="url"
                 value={formData.flyer}
                 onChange={(e) => setFormData({ ...formData, flyer: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 required
                 placeholder="https://i.postimg.cc/..."
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Sube tu imagen en <a href="https://postimages.org" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">PostImages.org</a> y pega el enlace directo aquí
+              <p className="help-text">
+                Sube tu imagen en <a href="https://postimages.org" target="_blank" rel="noopener noreferrer">PostImages.org</a> y pega el enlace directo aquí
               </p>
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-gray-300 mb-2">Link de Boletos</label>
+            <div className="form-field full-width">
+              <label>Link de Boletos</label>
               <input
                 type="url"
                 value={formData.ticketLink}
                 onChange={(e) => setFormData({ ...formData, ticketLink: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 placeholder="https://..."
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-gray-300 mb-2">Dirección Completa</label>
+            <div className="form-field full-width">
+              <label>Dirección Completa</label>
               <input
                 type="text"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 placeholder="34 NE 11th St, Miami, FL 33132"
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-gray-300 mb-2">URLs de Fotos (una por línea, para eventos pasados)</label>
+            <div className="form-field full-width">
+              <label>URLs de Fotos (una por línea, para eventos pasados)</label>
               <textarea
                 value={formData.photos?.join('\n')}
                 onChange={(e) => setFormData({ ...formData, photos: e.target.value.split('\n').filter(p => p.trim()) })}
-                className="w-full px-4 py-2 bg-black border-2 border-cyan-500/30 rounded text-white focus:border-cyan-500 outline-none"
                 rows={4}
                 placeholder="https://i.postimg.cc/foto1.jpg&#10;https://i.postimg.cc/foto2.jpg"
               />
             </div>
 
-            <div className="md:col-span-2 flex gap-4">
+            <div className="form-buttons">
               <button
                 type="submit"
-                className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 px-6 rounded-lg transition-all"
+                className="btn-submit"
               >
                 {editingId ? "Actualizar Evento" : "Crear Evento"}
               </button>
@@ -435,7 +718,7 @@ export default function AdminPanel() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                  className="btn-cancel"
                 >
                   Cancelar
                 </button>
@@ -444,30 +727,30 @@ export default function AdminPanel() {
           </form>
         </div>
 
-        <div className="bg-gray-900 p-6 rounded-lg border-2 border-cyan-500/20">
-          <h2 className="text-2xl font-bold mb-6 text-cyan-500">Eventos Existentes</h2>
+        <div className="events-list-section">
+          <h2>Eventos Existentes</h2>
 
-          <div className="grid gap-4">
+          <div className="events-grid">
             {events.map((event) => (
-              <div key={event.id} className="bg-black p-4 rounded-lg border border-cyan-500/20 flex justify-between items-start">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
-                  <div className="text-gray-400 space-y-1">
+              <div key={event.id} className="event-card">
+                <div className="event-info">
+                  <h3>{event.title}</h3>
+                  <div className="event-details">
                     <p>📅 {new Date(event.date).toLocaleDateString()} - {event.time}</p>
                     <p>📍 {event.venue}, {event.location}</p>
-                    <p className="text-sm">{event.description}</p>
+                    <p>{event.description}</p>
                   </div>
                 </div>
-                <div className="flex gap-2 ml-4">
+                <div className="event-actions">
                   <button
                     onClick={() => handleEdit(event)}
-                    className="bg-cyan-500 hover:bg-cyan-400 text-black px-4 py-2 rounded transition-colors"
+                    className="btn-edit"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleDelete(event.id)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition-colors"
+                    className="btn-delete"
                   >
                     Eliminar
                   </button>
@@ -476,7 +759,7 @@ export default function AdminPanel() {
             ))}
 
             {events.length === 0 && (
-              <p className="text-center text-gray-500 py-8">No hay eventos todavía</p>
+              <p className="no-events">No hay eventos todavía</p>
             )}
           </div>
         </div>
