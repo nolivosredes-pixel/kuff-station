@@ -24,7 +24,7 @@ export default function AdminLogin() {
     });
 
     if (result?.error) {
-      setError("Credenciales incorrectas");
+      setError("Invalid credentials");
       setLoading(false);
     } else {
       router.push("/admin");
@@ -268,8 +268,8 @@ export default function AdminLogin() {
               }}
             />
           </div>
-          <h1 className="login-title">Panel de Administración</h1>
-          <p className="login-subtitle">Ingresa tus credenciales</p>
+          <h1 className="login-title">Admin Panel</h1>
+          <p className="login-subtitle">Enter your credentials</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
@@ -281,7 +281,7 @@ export default function AdminLogin() {
 
           <div className="form-group">
             <label htmlFor="email" className="form-label">
-              Usuario
+              Username
             </label>
             <input
               type="text"
@@ -297,7 +297,7 @@ export default function AdminLogin() {
 
           <div className="form-group">
             <label htmlFor="password" className="form-label">
-              Contraseña
+              Password
             </label>
             <input
               type="password"
@@ -315,7 +315,7 @@ export default function AdminLogin() {
             disabled={loading}
             className="submit-button"
           >
-            {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 

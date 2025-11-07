@@ -69,10 +69,10 @@ export default function AdminStreamControl() {
       // Setup audio visualization
       setupAudioVisualization(stream);
 
-      alert('✅ Cámara agregada! Preview activo.');
+      alert('✅ Camera added! Preview active.');
     } catch (error: any) {
       console.error('Error adding camera:', error);
-      alert('❌ Error al acceder a la cámara: ' + error.message);
+      alert('❌ Error accessing camera: ' + error.message);
     }
   };
 
@@ -105,10 +105,10 @@ export default function AdminStreamControl() {
       // Setup audio visualization if available
       setupAudioVisualization(stream);
 
-      alert('✅ Pantalla compartida agregada! Preview activo.');
+      alert('✅ Screen share added! Preview active.');
     } catch (error: any) {
       console.error('Error adding screen:', error);
-      alert('❌ Error al compartir pantalla: ' + error.message);
+      alert('❌ Error sharing screen: ' + error.message);
     }
   };
 
@@ -480,8 +480,8 @@ export default function AdminStreamControl() {
 
       <div className="info-box">
         <p>
-          <strong>📹 Sistema de Streaming con Preview en Vivo</strong><br />
-          Agrega tu cámara o comparte tu pantalla para ver el preview. La visualización de audio muestra el nivel en tiempo real.
+          <strong>📹 Live Streaming System with Live Preview</strong><br />
+          Add your camera or share your screen to see the preview. Audio visualization shows real-time levels.
         </p>
       </div>
 
@@ -493,7 +493,7 @@ export default function AdminStreamControl() {
           </div>
         ) : (
           <div className="no-preview">
-            Agrega una fuente para ver el preview
+            Add a source to see the preview
           </div>
         )}
 

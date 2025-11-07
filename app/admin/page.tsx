@@ -69,7 +69,7 @@ export default function AdminPanel() {
 
       setMessage({
         type: "success",
-        text: editingId ? "Evento actualizado exitosamente" : "Evento creado exitosamente"
+        text: editingId ? "Event updated successfully" : "Event created successfully"
       });
 
       resetForm();
@@ -77,23 +77,23 @@ export default function AdminPanel() {
 
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } catch (error) {
-      setMessage({ type: "error", text: "Error al guardar el evento" });
+      setMessage({ type: "error", text: "Error saving event" });
     }
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("¿Estás seguro de que deseas eliminar este evento?")) return;
+    if (!confirm("Are you sure you want to delete this event?")) return;
 
     try {
       const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete event");
 
-      setMessage({ type: "success", text: "Evento eliminado exitosamente" });
+      setMessage({ type: "success", text: "Event deleted successfully" });
       loadEvents();
 
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } catch (error) {
-      setMessage({ type: "error", text: "Error al eliminar el evento" });
+      setMessage({ type: "error", text: "Error deleting event" });
     }
   }
 
@@ -123,7 +123,7 @@ export default function AdminPanel() {
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-cyan-500 text-xl">Cargando...</div>
+        <div className="text-cyan-500 text-xl">Loading...</div>
       </div>
     );
   }
@@ -552,15 +552,15 @@ export default function AdminPanel() {
               <Image src="/assets/images/kuff-white.png" alt="KUFF" width={60} height={60} />
             </div>
             <div className="header-text">
-              <h1>Panel de Administración</h1>
-              <p>Gestión de Eventos KUFF</p>
+              <h1>Admin Panel</h1>
+              <p>KUFF Events Management</p>
             </div>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
             className="logout-btn"
           >
-            Cerrar Sesión
+            Sign Out
           </button>
         </div>
 
@@ -597,12 +597,12 @@ export default function AdminPanel() {
 
         <div className="event-form-section">
           <h2>
-            {editingId ? "Editar Evento" : "Agregar Nuevo Evento"}
+            {editingId ? "Edit Event" : "Add New Event"}
           </h2>
 
           <form onSubmit={handleSubmit} className="event-form">
             <div className="form-field full-width">
-              <label>Título del Evento *</label>
+              <label>Event Title *</label>
               <input
                 type="text"
                 value={formData.title}
@@ -612,7 +612,7 @@ export default function AdminPanel() {
             </div>
 
             <div className="form-field">
-              <label>Fecha *</label>
+              <label>Date *</label>
               <input
                 type="date"
                 value={formData.date}
@@ -622,7 +622,7 @@ export default function AdminPanel() {
             </div>
 
             <div className="form-field">
-              <label>Hora *</label>
+              <label>Time *</label>
               <input
                 type="time"
                 value={formData.time}
@@ -632,7 +632,7 @@ export default function AdminPanel() {
             </div>
 
             <div className="form-field">
-              <label>Ciudad/País *</label>
+              <label>City/Country *</label>
               <input
                 type="text"
                 value={formData.location}
@@ -654,7 +654,7 @@ export default function AdminPanel() {
             </div>
 
             <div className="form-field full-width">
-              <label>Descripción *</label>
+              <label>Description *</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -664,7 +664,7 @@ export default function AdminPanel() {
             </div>
 
             <div className="form-field full-width">
-              <label>URL del Flyer (PostImages.org) *</label>
+              <label>Flyer URL (PostImages.org) *</label>
               <input
                 type="url"
                 value={formData.flyer}
@@ -673,12 +673,12 @@ export default function AdminPanel() {
                 placeholder="https://i.postimg.cc/..."
               />
               <p className="help-text">
-                Sube tu imagen en <a href="https://postimages.org" target="_blank" rel="noopener noreferrer">PostImages.org</a> y pega el enlace directo aquí
+                Upload your image to <a href="https://postimages.org" target="_blank" rel="noopener noreferrer">PostImages.org</a> and paste the direct link here
               </p>
             </div>
 
             <div className="form-field full-width">
-              <label>Link de Boletos</label>
+              <label>Tickets Link</label>
               <input
                 type="url"
                 value={formData.ticketLink}
@@ -688,7 +688,7 @@ export default function AdminPanel() {
             </div>
 
             <div className="form-field full-width">
-              <label>Dirección Completa</label>
+              <label>Full Address</label>
               <input
                 type="text"
                 value={formData.address}
@@ -698,7 +698,7 @@ export default function AdminPanel() {
             </div>
 
             <div className="form-field full-width">
-              <label>URLs de Fotos (una por línea, para eventos pasados)</label>
+              <label>Photo URLs (one per line, for past events)</label>
               <textarea
                 value={formData.photos?.join('\n')}
                 onChange={(e) => setFormData({ ...formData, photos: e.target.value.split('\n').filter(p => p.trim()) })}
@@ -712,7 +712,7 @@ export default function AdminPanel() {
                 type="submit"
                 className="btn-submit"
               >
-                {editingId ? "Actualizar Evento" : "Crear Evento"}
+                {editingId ? "Update Event" : "Create Event"}
               </button>
               {editingId && (
                 <button
@@ -720,7 +720,7 @@ export default function AdminPanel() {
                   onClick={resetForm}
                   className="btn-cancel"
                 >
-                  Cancelar
+                  Cancel
                 </button>
               )}
             </div>
@@ -728,7 +728,7 @@ export default function AdminPanel() {
         </div>
 
         <div className="events-list-section">
-          <h2>Eventos Existentes</h2>
+          <h2>Existing Events</h2>
 
           <div className="events-grid">
             {events.map((event) => (
@@ -746,20 +746,20 @@ export default function AdminPanel() {
                     onClick={() => handleEdit(event)}
                     className="btn-edit"
                   >
-                    Editar
+                    Edit
                   </button>
                   <button
                     onClick={() => handleDelete(event.id)}
                     className="btn-delete"
                   >
-                    Eliminar
+                    Delete
                   </button>
                 </div>
               </div>
             ))}
 
             {events.length === 0 && (
-              <p className="no-events">No hay eventos todavía</p>
+              <p className="no-events">No events yet</p>
             )}
           </div>
         </div>
