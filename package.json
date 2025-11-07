@@ -1,4 +1,12 @@
 {
+  "name": "kuff-station",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd kuff-next && npm install && npm run build",
+    "start": "cd kuff-next && npm start",
+    "dev": "cd kuff-next && npm run dev"
+  },
   "dependencies": {
     "obs-websocket-js": "^5.0.6"
   }
