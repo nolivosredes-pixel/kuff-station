@@ -17,6 +17,23 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000
       }
+    },
+    {
+      name: 'streaming-server',
+      script: 'server/streaming-server.js',
+      cwd: '/workspaces/kuff-station/kuff-next',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 9000
+      },
+      env_production: {
+        NODE_ENV: 'production',
+        PORT: 9000
+      }
     }
   ]
 };

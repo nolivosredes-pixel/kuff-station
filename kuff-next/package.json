@@ -13,7 +13,9 @@
     "pm2:logs": "pm2 logs kuff-website",
     "pm2:status": "pm2 status",
     "pm2:delete": "pm2 delete kuff-website",
-    "pm2:monit": "pm2 monit"
+    "pm2:monit": "pm2 monit",
+    "streaming:start": "node server/streaming-server.js",
+    "streaming:dev": "nodemon server/streaming-server.js"
   },
   "author": "KUFF",
   "license": "ISC",
@@ -27,7 +29,8 @@
     "next-auth": "^4.24.13",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",
