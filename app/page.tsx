@@ -6,7 +6,6 @@ import EventsSection from "@/components/EventsSection";
 import Navigation from "@/components/Navigation";
 import GallerySection from "@/components/GallerySection";
 import FallingIcons from "@/components/FallingIcons";
-import LiveStreamCTA from "@/components/LiveStreamEnhanced";
 
 export default function Home() {
   return (
@@ -255,7 +254,14 @@ export default function Home() {
             <h2 className="section-title">Live Stream</h2>
             <div className="title-underline"></div>
           </div>
-          <LiveStreamCTA />
+          <div className="live-cta-simple">
+            <p className="live-description">
+              Watch KUFF perform live! Catch exclusive DJ sets, festival performances, and special events.
+            </p>
+            <Link href="/live" className="btn btn-primary btn-live">
+              Go to Live Stream →
+            </Link>
+          </div>
         </div>
       </section>
 
