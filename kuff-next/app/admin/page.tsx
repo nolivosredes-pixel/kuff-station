@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import { Event } from "@/lib/types";
+import AdminStreamControl from "@/components/AdminStreamControl";
 
 export default function AdminPanel() {
   const { data: session, status } = useSession();
@@ -156,6 +157,11 @@ export default function AdminPanel() {
             {message.text}
           </div>
         )}
+
+        {/* Live Streaming Control */}
+        <div className="mb-8">
+          <AdminStreamControl />
+        </div>
 
         <div className="bg-gray-900 p-6 rounded-lg border-2 border-cyan-500/20 mb-8">
           <h2 className="text-2xl font-bold mb-6 text-cyan-500">

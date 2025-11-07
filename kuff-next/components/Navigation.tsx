@@ -7,6 +7,7 @@ import Link from "next/link";
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +16,23 @@ export default function Navigation() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Check streaming status
+  useEffect(() => {
+    const checkStreamingStatus = async () => {
+      try {
+        const response = await fetch('/api/streaming/status');
+        const data = await response.json();
+        setIsLive(data.isLive);
+      } catch (error) {
+        console.error('Error fetching streaming status:', error);
+      }
+    };
+
+    checkStreamingStatus();
+    const interval = setInterval(checkStreamingStatus, 10000); // Check every 10 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const toggleMenu = () => {
@@ -59,8 +77,8 @@ export default function Navigation() {
             </Link>
           </li>
           <li>
-            <Link href="#live" className="nav-link" onClick={closeMenu}>
-              Live
+            <Link href="/live" className="nav-link" onClick={closeMenu}>
+              Live {isLive && <span className="live-badge">🔴</span>}
             </Link>
           </li>
           <li>
