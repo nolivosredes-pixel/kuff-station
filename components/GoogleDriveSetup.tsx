@@ -67,11 +67,15 @@ export default function GoogleDriveSetup() {
     <div className="google-drive-setup">
       <style jsx>{`
         .google-drive-setup {
-          background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
-          border-radius: 15px;
+          background: rgba(26, 26, 26, 0.8);
+          backdrop-filter: blur(10px);
+          border-radius: 20px;
           padding: 30px;
           color: white;
           margin-bottom: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.1);
+          font-family: 'Montserrat', sans-serif;
         }
 
         .header {
@@ -83,40 +87,56 @@ export default function GoogleDriveSetup() {
 
         .title {
           font-size: 1.8em;
-          font-weight: bold;
+          font-weight: 700;
           display: flex;
           align-items: center;
           gap: 10px;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          background: linear-gradient(135deg, #ffffff 0%, #00d9ff 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .status-badge {
-          padding: 8px 20px;
-          border-radius: 20px;
+          padding: 10px 25px;
+          border-radius: 50px;
           font-weight: bold;
           font-size: 0.9em;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .status-badge.connected {
           background: #51cf66;
+          box-shadow: 0 5px 20px rgba(81, 207, 102, 0.4);
         }
 
         .status-badge.disconnected {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(176, 176, 176, 0.2);
+          color: #b0b0b0;
+          border: 2px solid rgba(176, 176, 176, 0.3);
         }
 
         .description {
-          background: rgba(0, 0, 0, 0.15);
-          border-left: 4px solid rgba(255, 255, 255, 0.5);
+          background: rgba(0, 0, 0, 0.3);
+          border-left: 4px solid #00d9ff;
           padding: 15px;
-          border-radius: 8px;
+          border-radius: 10px;
           margin-bottom: 25px;
           line-height: 1.6;
         }
 
+        .description strong {
+          color: #00d9ff;
+        }
+
         .content {
-          background: rgba(0, 0, 0, 0.15);
-          border-radius: 10px;
+          background: rgba(0, 0, 0, 0.4);
+          border-radius: 15px;
           padding: 25px;
+          border: 2px solid rgba(0, 217, 255, 0.1);
         }
 
         .connected-info {
@@ -128,18 +148,23 @@ export default function GoogleDriveSetup() {
           justify-content: space-between;
           align-items: center;
           padding: 12px;
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 8px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 10px;
           margin-bottom: 10px;
+          border: 1px solid rgba(0, 217, 255, 0.15);
         }
 
         .info-label {
-          font-weight: bold;
-          opacity: 0.9;
+          font-weight: 600;
+          color: #b0b0b0;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-size: 0.9em;
         }
 
         .info-value {
           font-family: 'Courier New', monospace;
+          color: #00d9ff;
         }
 
         .form-group {
@@ -149,17 +174,28 @@ export default function GoogleDriveSetup() {
         .form-group label {
           display: block;
           margin-bottom: 8px;
-          font-weight: bold;
+          font-weight: 600;
+          color: #b0b0b0;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .form-group input {
           width: 100%;
-          padding: 12px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.1);
+          padding: 12px 15px;
+          border: 2px solid rgba(0, 217, 255, 0.3);
+          border-radius: 10px;
+          background: #000000;
           color: white;
           font-size: 1em;
+          transition: all 0.3s;
+          font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group input:focus {
+          outline: none;
+          border-color: #00d9ff;
+          box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
         }
 
         .checkbox-group {
@@ -167,15 +203,23 @@ export default function GoogleDriveSetup() {
           align-items: center;
           gap: 10px;
           padding: 12px;
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 8px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 10px;
           cursor: pointer;
+          border: 1px solid rgba(0, 217, 255, 0.15);
+          transition: all 0.3s;
+        }
+
+        .checkbox-group:hover {
+          background: rgba(0, 217, 255, 0.05);
+          border-color: rgba(0, 217, 255, 0.3);
         }
 
         .checkbox-group input[type="checkbox"] {
           width: 20px;
           height: 20px;
           cursor: pointer;
+          accent-color: #00d9ff;
         }
 
         .buttons {
@@ -187,48 +231,71 @@ export default function GoogleDriveSetup() {
         .btn {
           padding: 12px 25px;
           border: none;
-          border-radius: 8px;
-          font-weight: bold;
+          border-radius: 50px;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.3s;
           font-size: 1em;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .btn-primary {
-          background: white;
-          color: #4285f4;
+          background: #00d9ff;
+          color: #000000;
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
         }
 
         .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+          background: #00ffff;
+          transform: translateY(-3px);
+          box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5);
         }
 
         .btn-danger {
           background: #ff4444;
           color: white;
+          box-shadow: 0 10px 30px rgba(255, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+          background: #ff0000;
+          transform: translateY(-3px);
+          box-shadow: 0 15px 40px rgba(255, 68, 68, 0.5);
         }
 
         .btn-secondary {
-          background: rgba(255, 255, 255, 0.2);
-          color: white;
+          background: transparent;
+          color: #00d9ff;
+          border: 2px solid #00d9ff;
+        }
+
+        .btn-secondary:hover {
+          background: #00d9ff;
+          color: #000000;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
         }
 
         .instructions {
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 10px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 15px;
           padding: 20px;
           margin-top: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.1);
         }
 
         .instructions h4 {
           margin-bottom: 15px;
           font-size: 1.1em;
+          color: #00d9ff;
+          font-weight: 700;
         }
 
         .instructions ol {
           margin-left: 20px;
           line-height: 1.8;
+          color: #b0b0b0;
         }
 
         .instructions li {
@@ -236,22 +303,27 @@ export default function GoogleDriveSetup() {
         }
 
         .instructions code {
-          background: rgba(0, 0, 0, 0.3);
-          padding: 2px 6px;
-          border-radius: 4px;
+          background: rgba(0, 0, 0, 0.5);
+          padding: 4px 8px;
+          border-radius: 6px;
           font-family: 'Courier New', monospace;
+          color: #00d9ff;
+          border: 1px solid rgba(0, 217, 255, 0.2);
         }
 
         .features {
-          background: rgba(0, 0, 0, 0.15);
-          border-radius: 10px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 15px;
           padding: 20px;
           margin-top: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.1);
         }
 
         .features h4 {
           margin-bottom: 15px;
           font-size: 1.1em;
+          color: #00d9ff;
+          font-weight: 700;
         }
 
         .features ul {
@@ -263,6 +335,7 @@ export default function GoogleDriveSetup() {
           padding: 8px 0;
           padding-left: 25px;
           position: relative;
+          color: #b0b0b0;
         }
 
         .features li:before {
@@ -270,6 +343,7 @@ export default function GoogleDriveSetup() {
           position: absolute;
           left: 0;
           font-weight: bold;
+          color: #00d9ff;
         }
 
         @media (max-width: 768px) {
