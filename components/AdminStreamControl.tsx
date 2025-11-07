@@ -64,6 +64,10 @@ export default function AdminStreamControl() {
       // Set video preview
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        // Ensure video plays
+        videoRef.current.play().catch(err => {
+          console.error('Error playing video:', err);
+        });
       }
 
       // Setup audio visualization
@@ -100,6 +104,10 @@ export default function AdminStreamControl() {
       // Set video preview
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        // Ensure video plays
+        videoRef.current.play().catch(err => {
+          console.error('Error playing video:', err);
+        });
       }
 
       // Setup audio visualization if available
@@ -301,6 +309,7 @@ export default function AdminStreamControl() {
 
         .video-preview {
           width: 100%;
+          height: 400px;
           max-height: 500px;
           background: #000;
           border-radius: 15px;
@@ -312,6 +321,7 @@ export default function AdminStreamControl() {
           width: 100%;
           height: 100%;
           display: block;
+          object-fit: contain;
         }
 
         .no-preview {
@@ -489,7 +499,13 @@ export default function AdminStreamControl() {
         <div className="preview-label">🎥 Video Preview</div>
         {sources.length > 0 ? (
           <div className="video-preview">
-            <video ref={videoRef} autoPlay playsInline muted />
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{ backgroundColor: '#000' }}
+            />
           </div>
         ) : (
           <div className="no-preview">
