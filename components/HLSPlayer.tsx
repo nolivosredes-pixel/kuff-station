@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 
 interface HLSPlayerProps {
-  streamKey: string;
+  streamKey?: string;
+  hlsUrl?: string; // Direct HLS URL (for Owncast)
   onStreamStatus?: (isLive: boolean) => void;
 }
 
-export default function HLSPlayer({ streamKey, onStreamStatus }: HLSPlayerProps) {
+export default function HLSPlayer({ streamKey, hlsUrl, onStreamStatus }: HLSPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [isLive, setIsLive] = useState(false);
@@ -18,10 +19,22 @@ export default function HLSPlayer({ streamKey, onStreamStatus }: HLSPlayerProps)
     const video = videoRef.current;
     if (!video) return;
 
-    // Determine HLS URL based on environment
-    const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const baseUrl = isDev ? 'http://localhost:8000' : 'http://kuffdj.net:8000';
-    const streamUrl = `${baseUrl}/live/${streamKey}/index.m3u8`;
+    // Determine HLS URL
+    let streamUrl: string;
+
+    if (hlsUrl) {
+      // Direct HLS URL provided (Owncast or external)
+      streamUrl = hlsUrl;
+    } else if (streamKey) {
+      // Build URL from stream key (Node Media Server)
+      const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+      const baseUrl = isDev ? 'http://localhost:8000' : 'http://kuffdj.net:8000';
+      streamUrl = `${baseUrl}/live/${streamKey}/index.m3u8`;
+    } else {
+      console.error('No streamKey or hlsUrl provided');
+      setError('No stream URL configured');
+      return;
+    }
 
     console.log('Attempting to load HLS stream:', streamUrl);
 
@@ -119,7 +132,7 @@ export default function HLSPlayer({ streamKey, onStreamStatus }: HLSPlayerProps)
         hlsRef.current = null;
       }
     };
-  }, [streamKey, onStreamStatus]);
+  }, [streamKey, hlsUrl, onStreamStatus]);
 
   return (
     <div className="hls-player">

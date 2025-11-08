@@ -17,7 +17,8 @@ interface StreamingStatus {
   startedAt: string | null;
   title: string;
   description: string;
-  streamType?: 'own' | 'external';
+  streamType?: 'own' | 'external' | 'owncast';
+  hlsUrl?: string; // For Owncast HLS URL
 }
 
 export default function LivePage() {
@@ -44,21 +45,58 @@ export default function LivePage() {
     setLoading(false);
   }, []);
 
+  // Fetch Owncast streaming status
+  const fetchOwncastStatus = async () => {
+    try {
+      const response = await fetch('/api/owncast/status');
+      const data = await response.json();
+
+      if (data.online) {
+        // Owncast stream is online - but check if it's really LIVE or just the loop video
+        // If viewerCount > 0, it means someone is watching (likely real live stream)
+        // Stream title can also be used to detect real streaming
+        const isReallyLive = data.viewerCount > 0 || (data.streamTitle && !data.streamTitle.includes('KUFF Live Stream'));
+
+        setStatus({
+          isLive: isReallyLive, // Only mark as live if there are viewers or custom title
+          platform: 'Owncast',
+          streamUrl: null,
+          embedUrl: null,
+          startedAt: new Date().toISOString(),
+          title: data.streamTitle || 'KUFF 24/7 Stream',
+          description: isReallyLive ? 'Watch KUFF perform live!' : 'KUFF 24/7 music stream',
+          streamType: 'owncast',
+          hlsUrl: data.hlsUrl,
+        });
+        return true; // Owncast stream available (live or loop)
+      }
+      return false; // Owncast is offline
+    } catch (error) {
+      console.error('Error fetching Owncast status:', error);
+      return false;
+    }
+  };
+
   // Fetch external streaming status (YouTube, Twitch, etc)
   const fetchStatus = async () => {
     try {
-      const response = await fetch('/api/streaming/status');
-      const data = await response.json();
-      // Only use external stream if no own stream is active
-      if (!ownStreamLive && data.isLive) {
-        setStatus({ ...data, streamType: 'external' });
+      // First check Owncast (highest priority)
+      const owncastLive = await fetchOwncastStatus();
+
+      // If Owncast is not live and own RTMP is not live, check external streams
+      if (!owncastLive && !ownStreamLive) {
+        const response = await fetch('/api/streaming/status');
+        const data = await response.json();
+        if (data.isLive) {
+          setStatus({ ...data, streamType: 'external' });
+        }
       }
     } catch (error) {
       console.error('Error fetching streaming status:', error);
     }
   };
 
-  // Poll for external status updates every 10 seconds
+  // Poll for status updates every 10 seconds
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(fetchStatus, 10000);
@@ -82,7 +120,8 @@ export default function LivePage() {
     }
   };
 
-  const isStreamActive = status.isLive || (ownStreamKey && ownStreamLive);
+  // Show stream if: 1) Really live, 2) Owncast available (loop video), 3) Own RTMP stream
+  const isStreamActive = status.isLive || status.streamType === 'owncast' || (ownStreamKey && ownStreamLive);
 
   if (loading) {
     return (
@@ -352,6 +391,45 @@ export default function LivePage() {
           50% { opacity: 0.3; }
         }
 
+        /* 24/7 Stream Badge (for loop video) */
+        .stream-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background: linear-gradient(135deg, #0099cc 0%, #00d9ff 100%);
+          padding: 12px 30px;
+          border-radius: 50px;
+          font-size: 1.5em;
+          font-weight: bold;
+          color: white;
+          margin-bottom: 20px;
+          animation: streamPulse 3s infinite;
+          box-shadow: 0 5px 25px rgba(0, 217, 255, 0.4), 0 0 40px rgba(0, 217, 255, 0.2);
+          border: 2px solid rgba(0, 217, 255, 0.6);
+        }
+
+        @keyframes streamPulse {
+          0%, 100% {
+            box-shadow: 0 5px 25px rgba(0, 217, 255, 0.4), 0 0 40px rgba(0, 217, 255, 0.2);
+          }
+          50% {
+            box-shadow: 0 8px 35px rgba(0, 217, 255, 0.6), 0 0 60px rgba(0, 217, 255, 0.4);
+          }
+        }
+
+        .stream-dot {
+          width: 12px;
+          height: 12px;
+          background: white;
+          border-radius: 50%;
+          animation: slowBlink 2s infinite;
+        }
+
+        @keyframes slowBlink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
         .live-header h1 {
           font-size: 2.5em;
           color: white;
@@ -551,17 +629,31 @@ export default function LivePage() {
         /* ONLINE STATE */
         <div className="online-container">
           <div className="live-header">
-            <div className="live-badge">
-              <span className="live-dot"></span>
-              LIVE NOW
-            </div>
+            {status.isLive ? (
+              /* Real LIVE stream */
+              <div className="live-badge">
+                <span className="live-dot"></span>
+                LIVE NOW
+              </div>
+            ) : (
+              /* 24/7 Stream (loop video) */
+              <div className="stream-badge">
+                <span className="stream-dot"></span>
+                24/7 STREAM
+              </div>
+            )}
             <h1>{status.title}</h1>
             <p>{status.description}</p>
           </div>
 
           <div className="stream-container">
             <div className="stream-wrapper">
-              {status.streamType === 'own' && ownStreamKey ? (
+              {status.streamType === 'owncast' && status.hlsUrl ? (
+                /* OWNCAST STREAM */
+                <HLSPlayer
+                  hlsUrl={status.hlsUrl}
+                />
+              ) : status.streamType === 'own' && ownStreamKey ? (
                 /* OWN RTMP STREAM */
                 <HLSPlayer
                   streamKey={ownStreamKey}
