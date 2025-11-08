@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+// Owncast status API endpoint
 export async function GET() {
   try {
     // Get Owncast server URL from environment variable
