@@ -24,12 +24,20 @@ export default function OwncastConfig() {
 
   const fetchOwncastStatus = async () => {
     try {
-      const response = await fetch('/api/owncast/status');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 sec timeout
+
+      const response = await fetch('/api/owncast/status', {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
       const data = await response.json();
       setStatus(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching Owncast status:', error);
+      setStatus({ online: false, error: 'Timeout or network error' });
       setLoading(false);
     }
   };
