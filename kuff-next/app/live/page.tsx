@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+const HLSPlayer = dynamic(() => import('@/components/HLSPlayer'), {
+  ssr: false,
+});
 
 interface StreamingStatus {
   isLive: boolean;
@@ -12,6 +17,8 @@ interface StreamingStatus {
   startedAt: string | null;
   title: string;
   description: string;
+  streamType?: 'own' | 'external' | 'owncast';
+  hlsUrl?: string; // For Owncast HLS URL
 }
 
 export default function LivePage() {
@@ -23,28 +30,109 @@ export default function LivePage() {
     startedAt: null,
     title: 'KUFF Live Stream',
     description: 'Watch KUFF perform live!',
+    streamType: 'own',
   });
   const [loading, setLoading] = useState(true);
+  const [ownStreamKey, setOwnStreamKey] = useState<string | null>(null);
+  const [ownStreamLive, setOwnStreamLive] = useState(false);
 
-  // Fetch streaming status
-  const fetchStatus = async () => {
+  // Check for own RTMP stream key
+  useEffect(() => {
+    const savedKey = localStorage.getItem('kuff_stream_key');
+    if (savedKey) {
+      setOwnStreamKey(savedKey);
+    }
+  }, []);
+
+  // Fetch Owncast streaming status
+  const fetchOwncastStatus = async () => {
     try {
-      const response = await fetch('/api/streaming/status');
+      const response = await fetch('/api/owncast/status');
       const data = await response.json();
-      setStatus(data);
-      setLoading(false);
+
+      if (data.online) {
+        // Owncast stream is online - but check if it's really LIVE or just the loop video
+        // If viewerCount > 0, it means someone is watching (likely real live stream)
+        // Stream title can also be used to detect real streaming
+        const isReallyLive = data.viewerCount > 0 || (data.streamTitle && !data.streamTitle.includes('KUFF Live Stream'));
+
+        setStatus({
+          isLive: isReallyLive, // Only mark as live if there are viewers or custom title
+          platform: 'Owncast',
+          streamUrl: null,
+          embedUrl: null,
+          startedAt: new Date().toISOString(),
+          title: data.streamTitle || 'KUFF 24/7 Stream',
+          description: isReallyLive ? 'Watch KUFF perform live!' : 'KUFF 24/7 music stream',
+          streamType: 'owncast',
+          hlsUrl: data.hlsUrl,
+        });
+        return true; // Owncast stream available (live or loop)
+      }
+      return false; // Owncast is offline
     } catch (error) {
-      console.error('Error fetching streaming status:', error);
-      setLoading(false);
+      console.error('Error fetching Owncast status:', error);
+      return false;
     }
   };
 
-  // Poll for status updates every 5 seconds
+  // Fetch external streaming status (YouTube, Twitch, etc)
+  const fetchStatus = async () => {
+    try {
+      // First check Owncast (highest priority)
+      const owncastLive = await fetchOwncastStatus();
+
+      // If Owncast is not live and own RTMP is not live, check external streams
+      if (!owncastLive && !ownStreamLive) {
+        const response = await fetch('/api/streaming/status');
+        const data = await response.json();
+        if (data.isLive) {
+          setStatus({ ...data, streamType: 'external' });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching streaming status:', error);
+    }
+  };
+
+  // Poll for status updates every 10 seconds
   useEffect(() => {
-    fetchStatus();
-    const interval = setInterval(fetchStatus, 5000);
+    // Initial fetch and stop loading
+    fetchStatus().finally(() => setLoading(false));
+
+    const interval = setInterval(fetchStatus, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [ownStreamLive]);
+
+  // Handler for own stream status
+  const handleOwnStreamStatus = (isLive: boolean) => {
+    setOwnStreamLive(isLive);
+    if (isLive) {
+      setStatus({
+        isLive: true,
+        platform: 'Own RTMP Server',
+        streamUrl: null,
+        embedUrl: null,
+        startedAt: new Date().toISOString(),
+        title: 'KUFF Live Stream',
+        description: 'Watch KUFF perform live via RTMP!',
+        streamType: 'own',
+      });
+    }
+  };
+
+  // Show stream if: 1) Really live, 2) Owncast available (loop video), 3) Own RTMP stream
+  const isStreamActive = status.isLive || status.streamType === 'owncast' || (ownStreamKey && ownStreamLive);
+
+  // Debug: Log current status
+  console.log('Live Page Status:', {
+    isStreamActive,
+    statusIsLive: status.isLive,
+    streamType: status.streamType,
+    platform: status.platform,
+    hlsUrl: status.hlsUrl,
+    loading
+  });
 
   if (loading) {
     return (
@@ -59,7 +147,7 @@ export default function LivePage() {
       <style jsx>{`
         .live-page {
           min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000814 100%);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -67,10 +155,30 @@ export default function LivePage() {
           padding: 20px;
           position: relative;
           overflow: hidden;
+          font-family: 'Montserrat', sans-serif;
+        }
+
+        .live-page::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background:
+            radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(0, 153, 204, 0.08) 0%, transparent 50%);
+          animation: pulse 8s ease-in-out infinite;
+          z-index: 1;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
         }
 
         .live-page.loading {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000814 100%);
         }
 
         .spinner {
@@ -102,9 +210,22 @@ export default function LivePage() {
         .logo-glow {
           position: absolute;
           inset: -20px;
-          background: radial-gradient(circle, rgba(145, 71, 255, 0.4) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(0, 217, 255, 0.3) 0%, transparent 70%);
           border-radius: 50%;
-          animation: pulse 3s ease-in-out infinite;
+          animation: logoGlowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoGlowPulse {
+          0%, 100% {
+            opacity: 0.6;
+            transform: scale(1);
+            background: radial-gradient(circle, rgba(0, 217, 255, 0.3) 0%, transparent 70%);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.05);
+            background: radial-gradient(circle, rgba(0, 217, 255, 0.5) 0%, transparent 70%);
+          }
         }
 
         .logo-circle {
@@ -130,8 +251,22 @@ export default function LivePage() {
         .logo-image {
           position: relative;
           z-index: 2;
-          animation: float 4s ease-in-out infinite;
-          filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+          animation: float 4s ease-in-out infinite, logoGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+          0%, 100% {
+            filter:
+              drop-shadow(0 0 20px rgba(0, 217, 255, 0.5))
+              drop-shadow(0 0 40px rgba(0, 217, 255, 0.3))
+              drop-shadow(0 0 60px rgba(0, 217, 255, 0.2));
+          }
+          50% {
+            filter:
+              drop-shadow(0 0 40px rgba(0, 217, 255, 0.8))
+              drop-shadow(0 0 80px rgba(0, 217, 255, 0.5))
+              drop-shadow(0 0 120px rgba(0, 255, 255, 0.3));
+          }
         }
 
         @keyframes pulse {
@@ -185,20 +320,24 @@ export default function LivePage() {
           align-items: center;
           gap: 10px;
           padding: 12px 24px;
-          background: rgba(255, 255, 255, 0.2);
-          border: 2px solid rgba(255, 255, 255, 0.3);
+          background: transparent;
+          border: 2px solid #00d9ff;
           border-radius: 50px;
-          color: white;
+          color: #00d9ff;
           text-decoration: none;
-          font-weight: bold;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-size: 0.9rem;
           transition: all 0.3s;
           backdrop-filter: blur(10px);
         }
 
         .social-link:hover {
-          background: rgba(255, 255, 255, 0.3);
-          transform: translateY(-2px);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          background: #00d9ff;
+          color: #000000;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
         }
 
         /* Online State */
@@ -236,8 +375,18 @@ export default function LivePage() {
           font-weight: bold;
           color: white;
           margin-bottom: 20px;
-          animation: pulse 2s infinite;
-          box-shadow: 0 5px 25px rgba(255, 0, 0, 0.5);
+          animation: livePulse 2s infinite;
+          box-shadow: 0 5px 25px rgba(255, 0, 0, 0.6), 0 0 40px rgba(0, 217, 255, 0.3);
+          border: 2px solid rgba(0, 217, 255, 0.4);
+        }
+
+        @keyframes livePulse {
+          0%, 100% {
+            box-shadow: 0 5px 25px rgba(255, 0, 0, 0.6), 0 0 40px rgba(0, 217, 255, 0.3);
+          }
+          50% {
+            box-shadow: 0 8px 35px rgba(255, 0, 0, 0.8), 0 0 60px rgba(0, 217, 255, 0.5);
+          }
         }
 
         .live-dot {
@@ -253,6 +402,45 @@ export default function LivePage() {
           50% { opacity: 0.3; }
         }
 
+        /* 24/7 Stream Badge (for loop video) */
+        .stream-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background: linear-gradient(135deg, #0099cc 0%, #00d9ff 100%);
+          padding: 12px 30px;
+          border-radius: 50px;
+          font-size: 1.5em;
+          font-weight: bold;
+          color: white;
+          margin-bottom: 20px;
+          animation: streamPulse 3s infinite;
+          box-shadow: 0 5px 25px rgba(0, 217, 255, 0.4), 0 0 40px rgba(0, 217, 255, 0.2);
+          border: 2px solid rgba(0, 217, 255, 0.6);
+        }
+
+        @keyframes streamPulse {
+          0%, 100% {
+            box-shadow: 0 5px 25px rgba(0, 217, 255, 0.4), 0 0 40px rgba(0, 217, 255, 0.2);
+          }
+          50% {
+            box-shadow: 0 8px 35px rgba(0, 217, 255, 0.6), 0 0 60px rgba(0, 217, 255, 0.4);
+          }
+        }
+
+        .stream-dot {
+          width: 12px;
+          height: 12px;
+          background: white;
+          border-radius: 50%;
+          animation: slowBlink 2s infinite;
+        }
+
+        @keyframes slowBlink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
         .live-header h1 {
           font-size: 2.5em;
           color: white;
@@ -266,12 +454,12 @@ export default function LivePage() {
         }
 
         .stream-container {
-          background: rgba(0, 0, 0, 0.3);
+          background: rgba(0, 0, 0, 0.5);
           border-radius: 20px;
           overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.1);
           backdrop-filter: blur(10px);
-          border: 2px solid rgba(255, 255, 255, 0.1);
+          border: 2px solid rgba(0, 217, 255, 0.2);
         }
 
         .stream-wrapper {
@@ -316,20 +504,24 @@ export default function LivePage() {
 
         .watch-button {
           padding: 12px 30px;
-          background: rgba(255, 255, 255, 0.9);
-          color: #764ba2;
+          background: #00d9ff;
+          color: #000000;
           border: none;
           border-radius: 50px;
-          font-weight: bold;
-          font-size: 1em;
+          font-weight: 600;
+          font-size: 0.9rem;
+          text-transform: uppercase;
+          letter-spacing: 1px;
           cursor: pointer;
           transition: all 0.3s;
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+          text-decoration: none;
         }
 
         .watch-button:hover {
-          background: white;
-          transform: translateY(-2px);
-          box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+          background: #00ffff;
+          transform: translateY(-3px);
+          box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5);
         }
 
         /* Background Animation */
@@ -342,8 +534,9 @@ export default function LivePage() {
 
         .shape {
           position: absolute;
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(0, 217, 255, 0.03);
           border-radius: 50%;
+          border: 1px solid rgba(0, 217, 255, 0.1);
         }
 
         .shape:nth-child(1) {
@@ -408,7 +601,7 @@ export default function LivePage() {
         <div className="shape"></div>
       </div>
 
-      {!status.isLive ? (
+      {!isStreamActive ? (
         /* OFFLINE STATE */
         <div className="offline-container">
           <div className="logo-container">
@@ -447,17 +640,38 @@ export default function LivePage() {
         /* ONLINE STATE */
         <div className="online-container">
           <div className="live-header">
-            <div className="live-badge">
-              <span className="live-dot"></span>
-              LIVE NOW
-            </div>
+            {status.isLive ? (
+              /* Real LIVE stream */
+              <div className="live-badge">
+                <span className="live-dot"></span>
+                LIVE NOW
+              </div>
+            ) : (
+              /* 24/7 Stream (loop video) */
+              <div className="stream-badge">
+                <span className="stream-dot"></span>
+                24/7 STREAM
+              </div>
+            )}
             <h1>{status.title}</h1>
             <p>{status.description}</p>
           </div>
 
           <div className="stream-container">
             <div className="stream-wrapper">
-              {status.embedUrl ? (
+              {status.streamType === 'owncast' && status.hlsUrl ? (
+                /* OWNCAST STREAM */
+                <HLSPlayer
+                  hlsUrl={status.hlsUrl}
+                />
+              ) : status.streamType === 'own' && ownStreamKey ? (
+                /* OWN RTMP STREAM */
+                <HLSPlayer
+                  streamKey={ownStreamKey}
+                  onStreamStatus={handleOwnStreamStatus}
+                />
+              ) : status.embedUrl ? (
+                /* EXTERNAL STREAM (YouTube, Twitch, etc) */
                 <iframe
                   src={status.embedUrl}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
