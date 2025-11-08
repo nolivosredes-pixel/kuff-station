@@ -42,7 +42,6 @@ export default function LivePage() {
     if (savedKey) {
       setOwnStreamKey(savedKey);
     }
-    setLoading(false);
   }, []);
 
   // Fetch Owncast streaming status
@@ -98,7 +97,9 @@ export default function LivePage() {
 
   // Poll for status updates every 10 seconds
   useEffect(() => {
-    fetchStatus();
+    // Initial fetch and stop loading
+    fetchStatus().finally(() => setLoading(false));
+
     const interval = setInterval(fetchStatus, 10000);
     return () => clearInterval(interval);
   }, [ownStreamLive]);
