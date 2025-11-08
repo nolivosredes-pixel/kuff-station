@@ -8,13 +8,16 @@ interface OwncastStatus {
   streamTitle?: string;
   serverUrl?: string;
   hlsUrl?: string;
+  rtmpUrl?: string;
+  streamKey?: string;
   error?: string;
 }
 
 export default function OwncastConfig() {
   const [status, setStatus] = useState<OwncastStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState<'url' | 'hls' | null>(null);
+  const [copied, setCopied] = useState<'url' | 'hls' | 'rtmp' | 'key' | null>(null);
+  const [showKey, setShowKey] = useState(false);
 
   useEffect(() => {
     fetchOwncastStatus();
@@ -42,7 +45,7 @@ export default function OwncastConfig() {
     }
   };
 
-  const copyToClipboard = (text: string, type: 'url' | 'hls') => {
+  const copyToClipboard = (text: string, type: 'url' | 'hls' | 'rtmp' | 'key') => {
     navigator.clipboard.writeText(text);
     setCopied(type);
     setTimeout(() => setCopied(null), 2000);
@@ -471,6 +474,54 @@ export default function OwncastConfig() {
           </div>
         )}
       </div>
+
+      {status.rtmpUrl && status.streamKey && (
+        <div className="credentials-display" style={{ borderColor: 'rgba(255, 152, 0, 0.3)', background: 'rgba(255, 152, 0, 0.05)' }}>
+          <div style={{ marginBottom: '20px' }}>
+            <strong style={{ color: '#ff9800', fontSize: '1.1em', display: 'block', marginBottom: '10px' }}>
+              🎥 Streaming Credentials (OBS/Streaming Software)
+            </strong>
+            <p style={{ fontSize: '0.9em', color: '#b0b0b0', margin: 0 }}>
+              Share these credentials with anyone who needs to stream to your Owncast server
+            </p>
+          </div>
+
+          <div className="credential-item">
+            <div className="credential-label">📡 RTMP Server URL</div>
+            <div className="credential-value">
+              <span style={{ flex: 1 }}>{status.rtmpUrl}</span>
+              <button
+                className={`copy-btn ${copied === 'rtmp' ? 'copied' : ''}`}
+                onClick={() => copyToClipboard(status.rtmpUrl!, 'rtmp')}
+              >
+                {copied === 'rtmp' ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+          </div>
+
+          <div className="credential-item">
+            <div className="credential-label">🔑 Stream Key</div>
+            <div className="credential-value">
+              <span style={{ flex: 1, fontFamily: 'Courier New, monospace' }}>
+                {showKey ? status.streamKey : '••••••••••••••••••••••••••••••••'}
+              </span>
+              <button
+                className="copy-btn"
+                onClick={() => setShowKey(!showKey)}
+                style={{ marginRight: '10px' }}
+              >
+                {showKey ? '👁️ Hide' : '👁️ Show'}
+              </button>
+              <button
+                className={`copy-btn ${copied === 'key' ? 'copied' : ''}`}
+                onClick={() => copyToClipboard(status.streamKey!, 'key')}
+              >
+                {copied === 'key' ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="info-box">
         <strong>ℹ️ How It Works</strong>

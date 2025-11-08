@@ -3,8 +3,10 @@ import { NextResponse } from 'next/server';
 // Owncast status API endpoint
 export async function GET() {
   try {
-    // Get Owncast server URL from environment variable
+    // Get Owncast configuration from environment variables
     const owncastUrl = process.env.OWNCAST_SERVER_URL;
+    const rtmpUrl = process.env.OWNCAST_RTMP_URL;
+    const streamKey = process.env.OWNCAST_STREAM_KEY;
 
     if (!owncastUrl) {
       return NextResponse.json(
@@ -47,6 +49,8 @@ export async function GET() {
       streamTitle: data.streamTitle || 'KUFF Live Stream',
       serverUrl: owncastUrl,
       hlsUrl: `${owncastUrl}/hls/stream.m3u8`,
+      rtmpUrl: rtmpUrl,
+      streamKey: streamKey,
     });
 
   } catch (error) {
