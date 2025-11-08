@@ -1,1 +1,212 @@
-12
+/* KUFF - Owncast Custom CSS */
+/* Hide "Streaming on Owncast" and timestamp */
+[class*="statusbar"],
+[class*="streamDetails"],
+div:has(> time),
+.ant-statistic,
+.ant-statistic-content {
+  display: none !important;
+}
+
+/* Hide any text containing "Streaming on" or "Started" */
+*:not(script):not(style) {
+  &:has-text("Streaming on Owncast") {
+    display: none !important;
+  }
+  &:has-text("Started") {
+    display: none !important;
+  }
+}
+
+/* Artist Info Container */
+.kuff-artist-info {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(0, 217, 255, 0.3);
+  border-radius: 20px;
+  padding: 30px 50px;
+  text-align: center;
+  box-shadow:
+    0 10px 40px rgba(0, 217, 255, 0.2),
+    0 0 100px rgba(0, 217, 255, 0.1),
+    inset 0 0 30px rgba(0, 217, 255, 0.05);
+  animation: kuff-pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes kuff-pulse-glow {
+  0%, 100% {
+    box-shadow:
+      0 10px 40px rgba(0, 217, 255, 0.2),
+      0 0 100px rgba(0, 217, 255, 0.1),
+      inset 0 0 30px rgba(0, 217, 255, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 10px 60px rgba(0, 217, 255, 0.4),
+      0 0 120px rgba(0, 217, 255, 0.2),
+      inset 0 0 40px rgba(0, 217, 255, 0.1);
+  }
+}
+
+.kuff-artist-name {
+  font-size: 3em;
+  font-weight: 900;
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, #00d9ff 0%, #00ffff 50%, #0099cc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+  margin: 0 0 15px 0;
+  animation: kuff-text-glow 2s ease-in-out infinite;
+}
+
+@keyframes kuff-text-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(0, 217, 255, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 40px rgba(0, 217, 255, 0.8));
+  }
+}
+
+.kuff-artist-title {
+  font-size: 1.2em;
+  color: #b0b0b0;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.kuff-status-badge {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 2px;
+  animation: kuff-badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes kuff-badge-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* Music Reactive Visualizer Bars */
+.kuff-visualizer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 20px;
+  z-index: 9998;
+  pointer-events: none;
+}
+
+.kuff-bar {
+  width: 8px;
+  background: linear-gradient(to top, #00d9ff, #00ffff);
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+  transition: height 0.1s ease;
+}
+
+/* Animated background particles */
+.kuff-particle {
+  position: fixed;
+  width: 3px;
+  height: 3px;
+  background: rgba(0, 217, 255, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  animation: kuff-particle-float linear infinite;
+}
+
+@keyframes kuff-particle-float {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(var(--float-x));
+    opacity: 0;
+  }
+}
+
+/* Pulsing circles around artist info */
+.kuff-pulse-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(0, 217, 255, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: kuff-pulse-expand 3s ease-out infinite;
+}
+
+@keyframes kuff-pulse-expand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+  }
+}
+
+/* Genre tags */
+.kuff-genres {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.kuff-genre-tag {
+  padding: 5px 15px;
+  background: rgba(0, 217, 255, 0.1);
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  border-radius: 15px;
+  font-size: 0.8em;
+  color: #00d9ff;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.kuff-genre-tag:hover {
+  background: rgba(0, 217, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+}
