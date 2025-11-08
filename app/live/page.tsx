@@ -124,6 +124,16 @@ export default function LivePage() {
   // Show stream if: 1) Really live, 2) Owncast available (loop video), 3) Own RTMP stream
   const isStreamActive = status.isLive || status.streamType === 'owncast' || (ownStreamKey && ownStreamLive);
 
+  // Debug: Log current status
+  console.log('Live Page Status:', {
+    isStreamActive,
+    statusIsLive: status.isLive,
+    streamType: status.streamType,
+    platform: status.platform,
+    hlsUrl: status.hlsUrl,
+    loading
+  });
+
   if (loading) {
     return (
       <div className="live-page loading">

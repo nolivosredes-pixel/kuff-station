@@ -8,6 +8,7 @@ interface OwncastStatus {
   streamTitle?: string;
   serverUrl?: string;
   hlsUrl?: string;
+  error?: string;
 }
 
 export default function OwncastConfig() {
