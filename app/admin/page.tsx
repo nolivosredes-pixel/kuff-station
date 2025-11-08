@@ -11,6 +11,7 @@ import RTMPCredentials from "@/components/RTMPCredentials";
 import GoogleDriveSetup from "@/components/GoogleDriveSetup";
 import AdminStreamControl from "@/components/AdminStreamControl";
 import OwnRTMPServer from "@/components/OwnRTMPServer";
+import OwncastConfig from "@/components/OwncastConfig";
 
 export default function AdminPanel() {
   const { data: session, status } = useSession();
@@ -570,6 +571,11 @@ export default function AdminPanel() {
             {message.text}
           </div>
         )}
+
+        {/* Owncast Server Control */}
+        <div className="mb-8">
+          <OwncastConfig />
+        </div>
 
         {/* Quick Stream Control */}
         <div className="mb-8">

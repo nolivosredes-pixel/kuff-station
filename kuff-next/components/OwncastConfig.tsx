@@ -16,11 +16,6 @@ export default function OwncastConfig() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState<'url' | 'hls' | null>(null);
 
-  // Get Owncast URLs from environment (set by admin)
-  const OWNCAST_SERVER_URL = process.env.NEXT_PUBLIC_OWNCAST_SERVER_URL;
-  const OWNCAST_RTMP_URL = process.env.NEXT_PUBLIC_OWNCAST_RTMP_URL;
-  const OWNCAST_STREAM_KEY = process.env.NEXT_PUBLIC_OWNCAST_STREAM_KEY;
-
   useEffect(() => {
     fetchOwncastStatus();
     const interval = setInterval(fetchOwncastStatus, 10000); // Poll every 10s
@@ -412,8 +407,114 @@ export default function OwncastConfig() {
           When you stream to your Owncast server, it automatically appears on <strong>kuffdj.net/live</strong>.
           The KUFF website checks your Owncast server every 10 seconds for live status.
         </p>
+      </div>
+
+      <div className="action-buttons">
+        <style jsx>{`
+          .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+          }
+
+          .action-btn {
+            padding: 18px 25px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 2px solid transparent;
+          }
+
+          .action-btn.primary {
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            color: #000000;
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+          }
+
+          .action-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5);
+          }
+
+          .action-btn.secondary {
+            background: transparent;
+            border: 2px solid #00d9ff;
+            color: #00d9ff;
+          }
+
+          .action-btn.secondary:hover {
+            background: rgba(0, 217, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
+          }
+
+          .action-btn.success {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(81, 207, 102, 0.3);
+          }
+
+          .action-btn.success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(81, 207, 102, 0.5);
+          }
+
+          @media (max-width: 768px) {
+            .action-buttons {
+              grid-template-columns: 1fr;
+            }
+          }
+        `}</style>
+
+        <a
+          href={`${status.serverUrl}/admin`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="action-btn primary"
+        >
+          <span>⚙️</span>
+          <span>Open Owncast Admin</span>
+        </a>
+
+        <a
+          href="/live"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="action-btn success"
+        >
+          <span>📺</span>
+          <span>View Live Page</span>
+        </a>
+
+        <a
+          href={status.serverUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="action-btn secondary"
+        >
+          <span>🎥</span>
+          <span>View Public Stream</span>
+        </a>
+      </div>
+
+      <div className="info-box" style={{ marginTop: '20px', background: 'rgba(255, 152, 0, 0.1)', borderColor: 'rgba(255, 152, 0, 0.3)' }}>
+        <strong style={{ color: '#ff9800' }}>🎨 Personalization Applied!</strong>
+        <p>
+          The Owncast custom CSS and JavaScript have been added to hide "Streaming on Owncast" branding and show artist info instead.
+        </p>
         <p style={{ marginTop: '10px' }}>
-          To configure RTMP settings or manage your stream, visit your Owncast admin dashboard at <strong>{status.serverUrl}/admin</strong>
+          Files: <code>owncast-custom.css</code> and <code>owncast-artist-info.js</code> - See <strong>OWNCAST_ARTIST_CUSTOMIZATION.md</strong> for installation.
         </p>
       </div>
     </div>
