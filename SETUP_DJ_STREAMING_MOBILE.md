@@ -52,8 +52,10 @@ Transmitir en vivo a **kuffdj.net/live** directamente desde tu teléfono móvil.
    ```
    Name: KUFF Owncast
    URL: rtmp://kuffdj.nolivos.cloud:1936/live
-   Stream name: abc123
+   Stream name: YOUR_STREAM_KEY_HERE
    ```
+
+   ⚠️ **Obtén tu Stream Key desde:** https://kuffdj.net/admin (Panel de Owncast)
 
 4. **Guarda** la conexión
 
@@ -138,8 +140,10 @@ Transmitir en vivo a **kuffdj.net/live** directamente desde tu teléfono móvil.
 4. Configura:
    ```
    Stream URL: rtmp://kuffdj.nolivos.cloud:1936/live
-   Stream Key: abc123
+   Stream Key: YOUR_STREAM_KEY_HERE
    ```
+
+   ⚠️ **Obtén tu Stream Key desde:** https://kuffdj.net/admin (Panel de Owncast)
 
 5. **Save**
 
@@ -293,10 +297,10 @@ En la app, mientras transmites:
 
 ### No puedo conectar a Owncast
 
-1. Verifica las credenciales:
+1. Verifica las credenciales en https://kuffdj.net/admin:
    ```
    URL: rtmp://kuffdj.nolivos.cloud:1936/live
-   Key: abc123
+   Key: [Tu Stream Key del admin panel]
    ```
 2. Asegúrate de estar en internet (WiFi o datos)
 3. Prueba con otra conexión
@@ -345,7 +349,7 @@ En la app, mientras transmites:
 
 ### Seguridad
 
-1. **NUNCA** compartas tu Stream Key (`abc123`) públicamente
+1. **NUNCA** compartas tu Stream Key públicamente
 2. Solo compártela con DJs invitados de confianza
 3. Si se compromete, cámbiala en el admin de Owncast
 
@@ -380,7 +384,7 @@ Si tienes problemas:
 
 **Resumen rápido:**
 1. Descarga Larix Broadcaster
-2. Configura RTMP: `rtmp://kuffdj.nolivos.cloud:1936/live` / Key: `abc123`
+2. Configura RTMP: `rtmp://kuffdj.nolivos.cloud:1936/live` / Key: [Obtén del admin panel]
 3. Conecta audífonos
 4. Toca REC
 5. Apareces en kuffdj.net/live automáticamente
