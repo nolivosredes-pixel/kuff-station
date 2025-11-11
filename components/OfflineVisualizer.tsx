@@ -152,26 +152,40 @@ export default function OfflineVisualizer({
     let time = 0;
 
     const animate = () => {
-      time += 0.01;
+      time += 0.02;
 
-      // Create gradient background
+      // Create animated gradient background
       const gradient = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height / 2, 0,
-        canvas.width / 2, canvas.height / 2, canvas.width / 2
+        canvas.width / 2 + Math.sin(time * 0.5) * 50,
+        canvas.height / 2 + Math.cos(time * 0.5) * 50,
+        0,
+        canvas.width / 2,
+        canvas.height / 2,
+        canvas.width / 2
       );
-      gradient.addColorStop(0, 'rgba(0, 10, 20, 0.1)');
-      gradient.addColorStop(1, 'rgba(0, 30, 50, 0.1)');
+      gradient.addColorStop(0, 'rgba(0, 10, 20, 0.15)');
+      gradient.addColorStop(1, 'rgba(0, 30, 50, 0.15)');
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Simulate audio intensity with sine wave
-      const intensity = Math.abs(Math.sin(time)) * 0.5 + 0.5;
+      // Simulate audio frequencies (bass, mid, treble)
+      const bass = Math.abs(Math.sin(time * 0.8)) * 0.7 + 0.3;
+      const mid = Math.abs(Math.sin(time * 1.5)) * 0.6 + 0.4;
+      const treble = Math.abs(Math.sin(time * 2.3)) * 0.5 + 0.5;
+      const intensity = (bass + mid + treble) / 3;
 
-      // Update and draw particles
-      particles.forEach(particle => {
+      // Update and draw particles with frequency-based sizing
+      particles.forEach((particle, index) => {
+        // Different particles react to different frequencies
+        const freqIndex = index % 3;
+        let particleIntensity = intensity;
+        if (freqIndex === 0) particleIntensity = bass;
+        else if (freqIndex === 1) particleIntensity = mid;
+        else particleIntensity = treble;
+
         particle.update();
-        particle.draw(ctx, intensity);
+        particle.draw(ctx, particleIntensity);
       });
 
       // Draw connecting lines between close particles
@@ -193,21 +207,50 @@ export default function OfflineVisualizer({
         }
       }
 
-      // Draw pulsing circles
-      const pulseRadius = 50 + intensity * 100;
-      const pulse2Radius = 30 + intensity * 80;
-
+      // Draw multiple frequency rings (bass, mid, treble)
+      // Bass ring (low frequency - big and slow)
+      const bassRadius = 100 + bass * 150;
       ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2, pulseRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(0, 217, 255, ${0.2 * intensity})`;
+      ctx.arc(canvas.width / 2, canvas.height / 2, bassRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(0, 217, 255, ${0.3 * bass})`;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Mid ring
+      const midRadius = 70 + mid * 100;
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, midRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(51, 255, 204, ${0.4 * mid})`;
       ctx.lineWidth = 2;
       ctx.stroke();
 
+      // Treble ring (high frequency - small and fast)
+      const trebleRadius = 40 + treble * 60;
       ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2, pulse2Radius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(51, 255, 204, ${0.3 * intensity})`;
+      ctx.arc(canvas.width / 2, canvas.height / 2, trebleRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(102, 255, 255, ${0.5 * treble})`;
       ctx.lineWidth = 1;
       ctx.stroke();
+
+      // Draw frequency bars (visualizer style)
+      const barCount = 64;
+      const barWidth = canvas.width / barCount;
+      for (let i = 0; i < barCount; i++) {
+        // Simulate different frequencies
+        const freq = Math.abs(Math.sin(time * 2 + i * 0.1)) *
+                     Math.abs(Math.cos(time * 1.5 + i * 0.05));
+        const barHeight = freq * 200 * (bass * 0.5 + mid * 0.3 + treble * 0.2);
+
+        const x = i * barWidth;
+        const y = canvas.height - barHeight;
+
+        const gradient = ctx.createLinearGradient(x, y, x, canvas.height);
+        gradient.addColorStop(0, `rgba(0, 217, 255, ${0.6 * intensity})`);
+        gradient.addColorStop(1, `rgba(0, 217, 255, ${0.1 * intensity})`);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, y, barWidth - 2, barHeight);
+      }
 
       animationFrameRef.current = requestAnimationFrame(animate);
     };
@@ -273,8 +316,27 @@ export default function OfflineVisualizer({
           z-index: 2;
           border-radius: 20px;
           overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0, 217, 255, 0.3);
-          border: 2px solid rgba(0, 217, 255, 0.5);
+          box-shadow:
+            0 0 40px rgba(0, 217, 255, 0.4),
+            0 0 80px rgba(0, 217, 255, 0.2),
+            0 20px 60px rgba(0, 0, 0, 0.5);
+          border: 3px solid rgba(0, 217, 255, 0.6);
+          animation: videoGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes videoGlow {
+          0%, 100% {
+            box-shadow:
+              0 0 40px rgba(0, 217, 255, 0.4),
+              0 0 80px rgba(0, 217, 255, 0.2),
+              0 20px 60px rgba(0, 0, 0, 0.5);
+          }
+          50% {
+            box-shadow:
+              0 0 60px rgba(0, 217, 255, 0.6),
+              0 0 120px rgba(0, 217, 255, 0.3),
+              0 20px 80px rgba(0, 0, 0, 0.6);
+          }
         }
 
         :global(#youtube-player) {
@@ -290,27 +352,60 @@ export default function OfflineVisualizer({
           text-align: center;
           z-index: 3;
           color: white;
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(10px);
-          padding: 20px 40px;
-          border-radius: 15px;
-          border: 1px solid rgba(0, 217, 255, 0.3);
+          background: rgba(0, 0, 0, 0.85);
+          backdrop-filter: blur(15px);
+          padding: 25px 50px;
+          border-radius: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.4);
+          box-shadow:
+            0 0 30px rgba(0, 217, 255, 0.3),
+            0 10px 40px rgba(0, 0, 0, 0.5);
+          animation: overlayPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes overlayPulse {
+          0%, 100% {
+            border-color: rgba(0, 217, 255, 0.4);
+            box-shadow:
+              0 0 30px rgba(0, 217, 255, 0.3),
+              0 10px 40px rgba(0, 0, 0, 0.5);
+          }
+          50% {
+            border-color: rgba(0, 217, 255, 0.7);
+            box-shadow:
+              0 0 50px rgba(0, 217, 255, 0.5),
+              0 10px 60px rgba(0, 0, 0, 0.6);
+          }
         }
 
         .offline-overlay h1 {
-          font-size: 2em;
+          font-size: 2.2em;
           margin: 0 0 10px 0;
-          font-weight: 700;
-          background: linear-gradient(135deg, #00d9ff, #33ffcc);
+          font-weight: 800;
+          background: linear-gradient(135deg, #00d9ff 0%, #33ffcc 50%, #00d9ff 100%);
+          background-size: 200% 200%;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          animation: gradientShift 3s ease infinite;
+          text-shadow: 0 0 30px rgba(0, 217, 255, 0.3);
+        }
+
+        @keyframes gradientShift {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
         }
 
         .offline-overlay p {
           margin: 0;
-          font-size: 1em;
-          color: rgba(255, 255, 255, 0.8);
+          font-size: 1.1em;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.9);
+          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
 
         @media (max-width: 768px) {
