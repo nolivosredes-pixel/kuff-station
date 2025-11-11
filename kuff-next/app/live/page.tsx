@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 const HLSPlayer = dynamic(() => import('@/components/HLSPlayer'), {
+  ssr: false,
+});
+
+const OfflineVisualizer = dynamic(() => import('@/components/OfflineVisualizer'), {
   ssr: false,
 });
 
@@ -602,40 +604,13 @@ export default function LivePage() {
       </div>
 
       {!isStreamActive ? (
-        /* OFFLINE STATE */
-        <div className="offline-container">
-          <div className="logo-container">
-            <div className="logo-glow"></div>
-            <div className="logo-circle"></div>
-            <div className="logo-image">
-              <Image
-                src="/assets/images/kuff-white.png"
-                alt="KUFF"
-                width={400}
-                height={400}
-                priority
-              />
-            </div>
-          </div>
-
-          <div className="offline-text">
-            <h1>Stream Offline</h1>
-            <p>Check back soon for the next live performance!</p>
-            <p>Follow us on social media for stream notifications</p>
-          </div>
-
-          <div className="social-links">
-            <Link href="https://instagram.com/kuffdj" className="social-link" target="_blank">
-              Instagram
-            </Link>
-            <Link href="https://facebook.com/kuffdj" className="social-link" target="_blank">
-              Facebook
-            </Link>
-            <Link href="/#contact" className="social-link">
-              Contact
-            </Link>
-          </div>
-        </div>
+        /* OFFLINE STATE - YouTube Visualizer */
+        <OfflineVisualizer
+          youtubeVideos={[
+            'dQw4w9WgXcQ', // Replace with your KUFF YouTube video IDs
+            'dQw4w9WgXcQ', // Add more video IDs from your channel
+          ]}
+        />
       ) : (
         /* ONLINE STATE */
         <div className="online-container">
