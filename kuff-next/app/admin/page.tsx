@@ -10,7 +10,6 @@ import QuickStreamControl from "@/components/QuickStreamControl";
 import RTMPCredentials from "@/components/RTMPCredentials";
 import GoogleDriveSetup from "@/components/GoogleDriveSetup";
 import AdminStreamControl from "@/components/AdminStreamControl";
-import OwnRTMPServer from "@/components/OwnRTMPServer";
 import OwncastConfig from "@/components/OwncastConfig";
 
 export default function AdminPanel() {
@@ -580,11 +579,6 @@ export default function AdminPanel() {
         {/* Quick Stream Control */}
         <div className="mb-8">
           <QuickStreamControl />
-        </div>
-
-        {/* Own RTMP Server - Stream to /live */}
-        <div className="mb-8">
-          <OwnRTMPServer />
         </div>
 
         {/* RTMP Credentials for Production */}
