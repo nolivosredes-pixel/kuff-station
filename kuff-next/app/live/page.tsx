@@ -11,6 +11,10 @@ const OfflineVisualizer = dynamic(() => import('@/components/OfflineVisualizer')
   ssr: false,
 });
 
+const LiveChat = dynamic(() => import('@/components/LiveChat'), {
+  ssr: false,
+});
+
 interface StreamingStatus {
   isLive: boolean;
   platform: string | null;
@@ -345,8 +349,21 @@ export default function LivePage() {
         /* Online State */
         .online-container {
           width: 100%;
-          max-width: 1400px;
+          max-width: 1600px;
           z-index: 10;
+        }
+
+        .stream-and-chat {
+          display: grid;
+          grid-template-columns: 1fr 400px;
+          gap: 20px;
+          align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+          .stream-and-chat {
+            grid-template-columns: 1fr;
+          }
         }
 
         .live-header {
@@ -633,7 +650,8 @@ export default function LivePage() {
             <p>{status.description}</p>
           </div>
 
-          <div className="stream-container">
+          <div className="stream-and-chat">
+            <div className="stream-container">
             <div className="stream-wrapper">
               {status.streamType === 'owncast' && status.hlsUrl ? (
                 /* OWNCAST STREAM */
@@ -693,6 +711,10 @@ export default function LivePage() {
               )}
             </div>
           </div>
+
+          {/* Live Chat - only shows when stream is really live */}
+          <LiveChat isLive={status.isLive} />
+        </div>
         </div>
       )}
     </div>
