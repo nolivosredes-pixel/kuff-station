@@ -118,7 +118,7 @@ export default function OfflineVisualizer({
 
     // Particles array
     const particles: Particle[] = [];
-    const particleCount = 150;
+    const particleCount = 250; // More particles for better effect
 
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
@@ -134,9 +134,9 @@ export default function OfflineVisualizer({
       constructor() {
         this.x = Math.random() * canvasWidth;
         this.y = Math.random() * canvasHeight;
-        this.vx = (Math.random() - 0.5) * 2;
-        this.vy = (Math.random() - 0.5) * 2;
-        this.size = Math.random() * 3 + 1;
+        this.vx = (Math.random() - 0.5) * 3; // Faster movement
+        this.vy = (Math.random() - 0.5) * 3;
+        this.size = Math.random() * 4 + 2; // Bigger particles
         this.hue = Math.random() * 60 + 170; // Cyan/blue colors
       }
 
@@ -155,9 +155,12 @@ export default function OfflineVisualizer({
 
       draw(ctx: CanvasRenderingContext2D, intensity: number) {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * intensity, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${this.hue}, 70%, 50%, ${0.3 + intensity * 0.5})`;
+        ctx.arc(this.x, this.y, this.size * (1 + intensity), 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${this.hue}, 80%, 60%, ${0.5 + intensity * 0.5})`;
+        ctx.shadowBlur = 10 + intensity * 10;
+        ctx.shadowColor = `hsla(${this.hue}, 100%, 60%, ${intensity})`;
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
     }
 
@@ -171,26 +174,28 @@ export default function OfflineVisualizer({
     const animate = () => {
       time += 0.02;
 
-      // Create animated gradient background
+      // Create animated gradient background with more movement
       const gradient = ctx.createRadialGradient(
-        canvas.width / 2 + Math.sin(time * 0.5) * 50,
-        canvas.height / 2 + Math.cos(time * 0.5) * 50,
+        canvas.width / 2 + Math.sin(time * 0.5) * 100,
+        canvas.height / 2 + Math.cos(time * 0.5) * 100,
         0,
         canvas.width / 2,
         canvas.height / 2,
         canvas.width / 2
       );
-      gradient.addColorStop(0, 'rgba(0, 10, 20, 0.15)');
-      gradient.addColorStop(1, 'rgba(0, 30, 50, 0.15)');
+      gradient.addColorStop(0, 'rgba(0, 10, 20, 0.2)');
+      gradient.addColorStop(1, 'rgba(0, 30, 50, 0.2)');
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Simulate audio frequencies (bass, mid, treble)
-      const bass = Math.abs(Math.sin(time * 0.8)) * 0.7 + 0.3;
-      const mid = Math.abs(Math.sin(time * 1.5)) * 0.6 + 0.4;
-      const treble = Math.abs(Math.sin(time * 2.3)) * 0.5 + 0.5;
-      const intensity = (bass + mid + treble) / 3;
+      // Simulate audio frequencies with more variation (bass, mid, treble)
+      // Add random peaks to simulate music beats
+      const beatRandom = Math.random() > 0.85 ? 0.3 : 0;
+      const bass = Math.abs(Math.sin(time * 0.8)) * 0.8 + 0.2 + beatRandom;
+      const mid = Math.abs(Math.sin(time * 1.5 + 0.5)) * 0.7 + 0.3 + (beatRandom * 0.5);
+      const treble = Math.abs(Math.sin(time * 2.3 + 1)) * 0.6 + 0.4 + (beatRandom * 0.3);
+      const intensity = (bass * 0.5 + mid * 0.3 + treble * 0.2);
 
       // Update and draw particles with frequency-based sizing
       particles.forEach((particle, index) => {
@@ -206,8 +211,8 @@ export default function OfflineVisualizer({
       });
 
       // Draw connecting lines between close particles
-      ctx.strokeStyle = `rgba(0, 217, 255, ${0.1 * intensity})`;
-      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = `rgba(0, 217, 255, ${0.15 * intensity})`;
+      ctx.lineWidth = 1;
 
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -215,59 +220,73 @@ export default function OfflineVisualizer({
           const dy = particles[i].y - particles[j].y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 100) {
+          if (distance < 120) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(0, 217, 255, ${(1 - distance / 120) * 0.3 * intensity})`;
             ctx.stroke();
           }
         }
       }
 
-      // Draw multiple frequency rings (bass, mid, treble)
+      // Draw multiple frequency rings (bass, mid, treble) - MORE VISIBLE
       // Bass ring (low frequency - big and slow)
-      const bassRadius = 100 + bass * 150;
+      const bassRadius = 150 + bass * 200;
       ctx.beginPath();
       ctx.arc(canvas.width / 2, canvas.height / 2, bassRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(0, 217, 255, ${0.3 * bass})`;
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = `rgba(0, 217, 255, ${0.5 * bass})`;
+      ctx.lineWidth = 4 + bass * 2;
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = `rgba(0, 217, 255, ${bass})`;
       ctx.stroke();
+      ctx.shadowBlur = 0;
 
       // Mid ring
-      const midRadius = 70 + mid * 100;
+      const midRadius = 100 + mid * 120;
       ctx.beginPath();
       ctx.arc(canvas.width / 2, canvas.height / 2, midRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(51, 255, 204, ${0.4 * mid})`;
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = `rgba(51, 255, 204, ${0.6 * mid})`;
+      ctx.lineWidth = 3 + mid * 2;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = `rgba(51, 255, 204, ${mid})`;
       ctx.stroke();
+      ctx.shadowBlur = 0;
 
       // Treble ring (high frequency - small and fast)
-      const trebleRadius = 40 + treble * 60;
+      const trebleRadius = 50 + treble * 80;
       ctx.beginPath();
       ctx.arc(canvas.width / 2, canvas.height / 2, trebleRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(102, 255, 255, ${0.5 * treble})`;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = `rgba(102, 255, 255, ${0.7 * treble})`;
+      ctx.lineWidth = 2 + treble * 2;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = `rgba(102, 255, 255, ${treble})`;
       ctx.stroke();
+      ctx.shadowBlur = 0;
 
-      // Draw frequency bars (visualizer style)
-      const barCount = 64;
+      // Draw frequency bars (visualizer style) - BOTTOM OF SCREEN
+      const barCount = 100;
       const barWidth = canvas.width / barCount;
       for (let i = 0; i < barCount; i++) {
-        // Simulate different frequencies
-        const freq = Math.abs(Math.sin(time * 2 + i * 0.1)) *
-                     Math.abs(Math.cos(time * 1.5 + i * 0.05));
-        const barHeight = freq * 200 * (bass * 0.5 + mid * 0.3 + treble * 0.2);
+        // Simulate different frequencies with more variation
+        const freq = Math.abs(Math.sin(time * 2.5 + i * 0.15)) *
+                     Math.abs(Math.cos(time * 1.8 + i * 0.08));
+        const barHeight = freq * 300 * (bass * 0.6 + mid * 0.3 + treble * 0.1);
 
         const x = i * barWidth;
         const y = canvas.height - barHeight;
 
         const gradient = ctx.createLinearGradient(x, y, x, canvas.height);
-        gradient.addColorStop(0, `rgba(0, 217, 255, ${0.6 * intensity})`);
-        gradient.addColorStop(1, `rgba(0, 217, 255, ${0.1 * intensity})`);
+        gradient.addColorStop(0, `rgba(0, 217, 255, ${0.8 * intensity})`);
+        gradient.addColorStop(0.5, `rgba(51, 255, 204, ${0.5 * intensity})`);
+        gradient.addColorStop(1, `rgba(0, 217, 255, ${0.2 * intensity})`);
 
         ctx.fillStyle = gradient;
-        ctx.fillRect(x, y, barWidth - 2, barHeight);
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = `rgba(0, 217, 255, ${intensity * 0.5})`;
+        ctx.fillRect(x, y, barWidth - 1, barHeight);
       }
+      ctx.shadowBlur = 0;
 
       animationFrameRef.current = requestAnimationFrame(animate);
     };
@@ -367,16 +386,17 @@ export default function OfflineVisualizer({
           left: 50%;
           transform: translateX(-50%);
           text-align: center;
-          z-index: 3;
+          z-index: 10;
           color: white;
-          background: rgba(0, 0, 0, 0.85);
-          backdrop-filter: blur(15px);
-          padding: 25px 50px;
-          border-radius: 20px;
-          border: 2px solid rgba(0, 217, 255, 0.4);
+          background: rgba(0, 0, 0, 0.9);
+          backdrop-filter: blur(20px);
+          padding: 30px 60px;
+          border-radius: 25px;
+          border: 3px solid rgba(0, 217, 255, 0.6);
           box-shadow:
-            0 0 30px rgba(0, 217, 255, 0.3),
-            0 10px 40px rgba(0, 0, 0, 0.5);
+            0 0 40px rgba(0, 217, 255, 0.5),
+            0 0 80px rgba(0, 217, 255, 0.3),
+            0 15px 50px rgba(0, 0, 0, 0.7);
           animation: overlayPulse 3s ease-in-out infinite;
         }
 
@@ -396,16 +416,16 @@ export default function OfflineVisualizer({
         }
 
         .offline-overlay h1 {
-          font-size: 2.2em;
-          margin: 0 0 10px 0;
-          font-weight: 800;
-          background: linear-gradient(135deg, #00d9ff 0%, #33ffcc 50%, #00d9ff 100%);
-          background-size: 200% 200%;
+          font-size: 2.5em;
+          margin: 0 0 15px 0;
+          font-weight: 900;
+          background: linear-gradient(135deg, #00d9ff 0%, #33ffcc 50%, #66ffff 100%);
+          background-size: 300% 300%;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
           animation: gradientShift 3s ease infinite;
-          text-shadow: 0 0 30px rgba(0, 217, 255, 0.3);
+          filter: drop-shadow(0 0 20px rgba(0, 217, 255, 0.6));
         }
 
         @keyframes gradientShift {
@@ -419,10 +439,11 @@ export default function OfflineVisualizer({
 
         .offline-overlay p {
           margin: 0;
-          font-size: 1.1em;
-          font-weight: 500;
-          color: rgba(255, 255, 255, 0.9);
-          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+          font-size: 1.2em;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 1);
+          text-shadow: 0 2px 15px rgba(0, 0, 0, 0.8);
+          letter-spacing: 0.5px;
         }
 
         @media (max-width: 768px) {
