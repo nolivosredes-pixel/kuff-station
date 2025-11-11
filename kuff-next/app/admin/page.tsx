@@ -682,6 +682,65 @@ export default function AdminPanel() {
         {/* Streaming Tab */}
         {activeTab === 'streaming' && (
           <div className="tab-content">
+            {/* DJ Control Center - Featured */}
+            <div className="mb-8">
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(0, 153, 204, 0.2) 100%)',
+                borderRadius: '20px',
+                padding: '30px',
+                border: '2px solid rgba(0, 217, 255, 0.5)',
+                boxShadow: '0 10px 40px rgba(0, 217, 255, 0.2)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
+                  <div>
+                    <h3 style={{
+                      fontSize: '1.8rem',
+                      fontWeight: 700,
+                      color: '#00d9ff',
+                      marginBottom: '10px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px',
+                    }}>
+                      🎧 DJ Control Center
+                    </h3>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.05rem', marginBottom: '5px' }}>
+                      Professional live streaming console for DJs
+                    </p>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.95rem' }}>
+                      Audio mixer • Visual effects • Real-time metrics • Mobile ready
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => router.push('/admin/dj-control')}
+                    style={{
+                      background: 'linear-gradient(135deg, #00d9ff 0%, #0099cc 100%)',
+                      color: 'white',
+                      padding: '15px 40px',
+                      border: 'none',
+                      borderRadius: '50px',
+                      fontWeight: 700,
+                      fontSize: '1.1rem',
+                      cursor: 'pointer',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      boxShadow: '0 10px 30px rgba(0, 217, 255, 0.4)',
+                      transition: 'all 0.3s',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.boxShadow = '0 15px 40px rgba(0, 217, 255, 0.6)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 217, 255, 0.4)';
+                    }}
+                  >
+                    Launch DJ Console →
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* SRS/Owncast Server Config */}
             <div className="mb-8">
               <OwncastConfig />
