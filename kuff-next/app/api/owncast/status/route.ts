@@ -23,7 +23,8 @@ export async function GET() {
     // Try SRS API first (port 1985)
     try {
       // SRS API endpoint to check streams
-      const srsApiUrl = serverUrl.replace('https://', 'http://').replace('http://', 'http://') + ':1985/api/v1/streams/';
+      // Use direct IP for SRS API since port 1985 only supports HTTP
+      const srsApiUrl = 'http://66.51.126.59:1985/api/v1/streams/';
       const srsResponse = await fetch(srsApiUrl, {
         headers: {
           'Accept': 'application/json',
