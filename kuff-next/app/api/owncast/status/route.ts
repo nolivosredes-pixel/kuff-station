@@ -1,36 +1,70 @@
 import { NextResponse } from 'next/server';
 
-// Owncast status API endpoint
+// SRS/Owncast status API endpoint - supports both SRS and Owncast servers
 export async function GET() {
   try {
-    // Get Owncast configuration from environment variables
-    const owncastUrl = process.env.OWNCAST_SERVER_URL;
+    // Get server configuration from environment variables
+    const serverUrl = process.env.OWNCAST_SERVER_URL;
     const rtmpUrl = process.env.OWNCAST_RTMP_URL;
     const streamKey = process.env.OWNCAST_STREAM_KEY;
+    const hlsUrl = process.env.SRS_HLS_URL;
 
-    if (!owncastUrl) {
+    if (!serverUrl) {
       return NextResponse.json(
         {
           online: false,
-          error: 'Owncast server not configured',
+          error: 'Streaming server not configured',
           message: 'OWNCAST_SERVER_URL environment variable not set'
         },
         { status: 200 }
       );
     }
 
-    // Fetch status from Owncast API
-    const statusUrl = `${owncastUrl}/api/status`;
-    const response = await fetch(statusUrl, {
+    // Try SRS API first (port 1985)
+    try {
+      // SRS API endpoint to check streams
+      const srsApiUrl = serverUrl.replace('https://', 'http://').replace('http://', 'http://') + ':1985/api/v1/streams/';
+      const srsResponse = await fetch(srsApiUrl, {
+        headers: {
+          'Accept': 'application/json',
+        },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (srsResponse.ok) {
+        const srsData = await srsResponse.json();
+
+        // SRS returns { code: 0, streams: [...] }
+        // If streams array has items, server is online with active streams
+        const isOnline = srsData.code === 0 && srsData.streams && srsData.streams.length > 0;
+        const viewerCount = isOnline ? (srsData.streams[0]?.clients || 0) : 0;
+
+        return NextResponse.json({
+          online: isOnline,
+          viewerCount: viewerCount,
+          streamTitle: isOnline ? 'KUFF Live Stream' : 'KUFF 24/7',
+          serverUrl: serverUrl,
+          hlsUrl: hlsUrl || `${serverUrl}/live/stream.m3u8`,
+          rtmpUrl: rtmpUrl,
+          streamKey: streamKey,
+          serverType: 'SRS',
+        });
+      }
+    } catch (srsError) {
+      console.log('SRS API not available, trying Owncast...');
+    }
+
+    // Fallback to Owncast API
+    const owncastUrl = `${serverUrl}/api/status`;
+    const response = await fetch(owncastUrl, {
       headers: {
         'Accept': 'application/json',
       },
-      // Add timeout
       signal: AbortSignal.timeout(5000),
     });
 
     if (!response.ok) {
-      throw new Error(`Owncast API returned ${response.status}`);
+      throw new Error(`Streaming API returned ${response.status}`);
     }
 
     const data = await response.json();
@@ -47,14 +81,15 @@ export async function GET() {
       online: data.online || false,
       viewerCount: data.viewerCount || 0,
       streamTitle: data.streamTitle || 'KUFF Live Stream',
-      serverUrl: owncastUrl,
-      hlsUrl: `${owncastUrl}/hls/stream.m3u8`,
+      serverUrl: serverUrl,
+      hlsUrl: hlsUrl || `${serverUrl}/hls/stream.m3u8`,
       rtmpUrl: rtmpUrl,
       streamKey: streamKey,
+      serverType: 'Owncast',
     });
 
   } catch (error) {
-    console.error('Error fetching Owncast status:', error);
+    console.error('Error fetching streaming status:', error);
 
     return NextResponse.json(
       {

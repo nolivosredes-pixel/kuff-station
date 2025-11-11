@@ -10,6 +10,7 @@ interface OwncastStatus {
   hlsUrl?: string;
   rtmpUrl?: string;
   streamKey?: string;
+  serverType?: 'SRS' | 'Owncast';
   error?: string;
 }
 
@@ -406,7 +407,7 @@ export default function OwncastConfig() {
 
       <div className="header">
         <div className="title-section">
-          <div className="title">🎥 Owncast Server</div>
+          <div className="title">🎥 {status.serverType === 'SRS' ? 'SRS' : 'Owncast'} Server</div>
           <div className={`status-badge ${status.online ? 'online' : 'offline'}`}>
             {status.online ? '🔴 LIVE' : '⚫ OFFLINE'}
           </div>
@@ -414,11 +415,11 @@ export default function OwncastConfig() {
       </div>
 
       <div className="description">
-        <strong>📡 Your Owncast Streaming Server</strong>
+        <strong>📡 Your {status.serverType === 'SRS' ? 'SRS' : 'Owncast'} Streaming Server</strong>
         {status.online ? (
-          <p>Your Owncast server is currently streaming live! The stream is automatically displayed on kuffdj.net/live.</p>
+          <p>Your streaming server is currently live! The stream is automatically displayed on kuffdj.net/live.</p>
         ) : (
-          <p>Your Owncast server is configured but currently offline. Start streaming to make it appear on kuffdj.net/live.</p>
+          <p>Your streaming server is configured but currently offline. Start streaming to make it appear on kuffdj.net/live.</p>
         )}
       </div>
 
@@ -444,7 +445,22 @@ export default function OwncastConfig() {
       )}
 
       <div className="credentials-display">
-        {status.serverUrl && (
+        {status.hlsUrl && (
+          <div className="credential-item">
+            <div className="credential-label">📺 HLS Stream URL (Para viewers)</div>
+            <div className="credential-value">
+              <span style={{ flex: 1 }}>{status.hlsUrl}</span>
+              <button
+                className={`copy-btn ${copied === 'hls' ? 'copied' : ''}`}
+                onClick={() => copyToClipboard(status.hlsUrl!, 'hls')}
+              >
+                {copied === 'hls' ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {status.serverUrl && status.serverType === 'Owncast' && (
           <div className="credential-item">
             <div className="credential-label">🌐 Owncast Dashboard</div>
             <div className="credential-value">
@@ -458,31 +474,16 @@ export default function OwncastConfig() {
             </div>
           </div>
         )}
-
-        {status.hlsUrl && (
-          <div className="credential-item">
-            <div className="credential-label">📺 HLS Stream URL</div>
-            <div className="credential-value">
-              <span style={{ flex: 1 }}>{status.hlsUrl}</span>
-              <button
-                className={`copy-btn ${copied === 'hls' ? 'copied' : ''}`}
-                onClick={() => copyToClipboard(status.hlsUrl!, 'hls')}
-              >
-                {copied === 'hls' ? '✓ Copied' : 'Copy'}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {status.rtmpUrl && status.streamKey && (
         <div className="credentials-display" style={{ borderColor: 'rgba(255, 152, 0, 0.3)', background: 'rgba(255, 152, 0, 0.05)' }}>
           <div style={{ marginBottom: '20px' }}>
             <strong style={{ color: '#ff9800', fontSize: '1.1em', display: 'block', marginBottom: '10px' }}>
-              🎥 Streaming Credentials (OBS/Streaming Software)
+              🎥 Credenciales para Streaming (Larix Broadcaster / OBS)
             </strong>
             <p style={{ fontSize: '0.9em', color: '#b0b0b0', margin: 0 }}>
-              Share these credentials with anyone who needs to stream to your Owncast server
+              Usa estas credenciales en tu app de streaming (Larix Broadcaster en el celular, OBS en PC)
             </p>
           </div>
 
@@ -524,24 +525,25 @@ export default function OwncastConfig() {
       )}
 
       <div className="info-box">
-        <strong>ℹ️ How It Works</strong>
+        <strong>ℹ️ Cómo funciona</strong>
         <p>
-          When you stream to your Owncast server, it automatically appears on <strong>kuffdj.net/live</strong>.
-          The KUFF website checks your Owncast server every 10 seconds for live status.
+          Cuando transmites al servidor {status.serverType === 'SRS' ? 'SRS' : 'Owncast'}, automáticamente aparece en <strong>kuffdj.net/live</strong>.
+          {status.serverType === 'SRS' ? ' SRS ofrece muy baja latencia (3-5 segundos).' : ' El sitio verifica el servidor cada 10 segundos.'}
         </p>
       </div>
 
       <div className="action-buttons">
-
-        <a
-          href={`${status.serverUrl}/admin`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="action-btn primary"
-        >
-          <span>⚙️</span>
-          <span>Open Owncast Admin</span>
-        </a>
+        {status.serverType === 'Owncast' && (
+          <a
+            href={`${status.serverUrl}/admin`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="action-btn primary"
+          >
+            <span>⚙️</span>
+            <span>Open Owncast Admin</span>
+          </a>
+        )}
 
         <a
           href="/live"
@@ -550,29 +552,30 @@ export default function OwncastConfig() {
           className="action-btn success"
         >
           <span>📺</span>
-          <span>View Live Page</span>
+          <span>Ver Página Live</span>
         </a>
 
-        <a
-          href={status.serverUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="action-btn secondary"
-        >
-          <span>🎥</span>
-          <span>View Public Stream</span>
-        </a>
+        {status.serverType === 'Owncast' && (
+          <a
+            href={status.serverUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="action-btn secondary"
+          >
+            <span>🎥</span>
+            <span>View Public Stream</span>
+          </a>
+        )}
       </div>
 
-      <div className="info-box" style={{ marginTop: '20px', background: 'rgba(255, 152, 0, 0.1)', borderColor: 'rgba(255, 152, 0, 0.3)' }}>
-        <strong style={{ color: '#ff9800' }}>🎨 Personalization Applied!</strong>
-        <p>
-          The Owncast custom CSS and JavaScript have been added to hide "Streaming on Owncast" branding and show artist info instead.
-        </p>
-        <p style={{ marginTop: '10px' }}>
-          Files: <code>owncast-custom.css</code> and <code>owncast-artist-info.js</code> - See <strong>OWNCAST_ARTIST_CUSTOMIZATION.md</strong> for installation.
-        </p>
-      </div>
+      {status.serverType === 'Owncast' && (
+        <div className="info-box" style={{ marginTop: '20px', background: 'rgba(255, 152, 0, 0.1)', borderColor: 'rgba(255, 152, 0, 0.3)' }}>
+          <strong style={{ color: '#ff9800' }}>🎨 Personalización aplicada!</strong>
+          <p>
+            El CSS y JavaScript custom de Owncast han sido agregados para ocultar el branding de "Streaming on Owncast" y mostrar info del artista.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

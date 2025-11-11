@@ -1,0 +1,59 @@
+# Fly.io configuration for KUFF SRS Server
+app = "kuff-srs"
+primary_region = "mia"  # Miami - cercano a tu audiencia
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  SRS_LOG_TANK = "console"
+
+# RTMP Input (puerto 1935)
+[[services]]
+  internal_port = 1935
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 1935
+
+# HTTP Server para HLS (puerto 8080)
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 250
+    soft_limit = 200
+
+# HTTP API (puerto 1985)
+[[services]]
+  internal_port = 1985
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 1985
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1
