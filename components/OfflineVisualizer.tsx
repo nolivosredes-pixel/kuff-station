@@ -57,10 +57,18 @@ export default function OfflineVisualizer({
         rel: 0,
         modestbranding: 1,
         playsinline: 1,
+        mute: 0, // Start unmuted
+        enablejsapi: 1,
+        fs: 1, // Allow fullscreen
+        iv_load_policy: 3, // Hide annotations
       },
       events: {
         onReady: (event: any) => {
-          event.target.playVideo();
+          // Try to play with sound, if fails, mute and play
+          event.target.playVideo().catch(() => {
+            event.target.mute();
+            event.target.playVideo();
+          });
           initAudioContext();
         },
         onStateChange: (event: any) => {
@@ -69,6 +77,15 @@ export default function OfflineVisualizer({
             const nextIndex = (currentVideoIndex + 1) % youtubeVideos.length;
             setCurrentVideoIndex(nextIndex);
             event.target.loadVideoById(youtubeVideos[nextIndex]);
+          }
+        },
+        onError: (event: any) => {
+          console.error('YouTube player error:', event.data);
+          // Try next video if current fails
+          const nextIndex = (currentVideoIndex + 1) % youtubeVideos.length;
+          setCurrentVideoIndex(nextIndex);
+          if (newPlayer && newPlayer.loadVideoById) {
+            newPlayer.loadVideoById(youtubeVideos[nextIndex]);
           }
         },
       },
