@@ -11,10 +11,14 @@ import RTMPCredentials from "@/components/RTMPCredentials";
 import GoogleDriveSetup from "@/components/GoogleDriveSetup";
 import AdminStreamControl from "@/components/AdminStreamControl";
 import OwncastConfig from "@/components/OwncastConfig";
+import ChatModeration from "@/components/ChatModeration";
+
+type Tab = 'streaming' | 'events' | 'chat';
 
 export default function AdminPanel() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<Tab>('streaming');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<Partial<Event>>({
@@ -178,7 +182,7 @@ export default function AdminPanel() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 40px;
+          margin-bottom: 30px;
           padding: 20px;
           background: rgba(26, 26, 26, 0.6);
           backdrop-filter: blur(10px);
@@ -245,6 +249,69 @@ export default function AdminPanel() {
           from {
             opacity: 0;
             transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* Tab Navigation */
+        .tabs-container {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 30px;
+          background: rgba(26, 26, 26, 0.6);
+          backdrop-filter: blur(10px);
+          padding: 10px;
+          border-radius: 20px;
+          border: 2px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .tab-button {
+          flex: 1;
+          padding: 15px 30px;
+          background: transparent;
+          border: 2px solid transparent;
+          border-radius: 15px;
+          color: #b0b0b0;
+          font-weight: 700;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.3s;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+        }
+
+        .tab-button:hover {
+          color: #00d9ff;
+          background: rgba(0, 217, 255, 0.1);
+        }
+
+        .tab-button.active {
+          background: linear-gradient(135deg, #0099cc 0%, #00d9ff 100%);
+          color: white;
+          border-color: rgba(0, 217, 255, 0.5);
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .tab-icon {
+          font-size: 1.3em;
+        }
+
+        /* Tab Content */
+        .tab-content {
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
           }
           to {
             opacity: 1;
@@ -544,6 +611,22 @@ export default function AdminPanel() {
           padding: 40px 20px;
           font-size: 1.1rem;
         }
+
+        @media (max-width: 768px) {
+          .tabs-container {
+            flex-direction: column;
+          }
+
+          .tab-button {
+            padding: 12px 20px;
+          }
+
+          .admin-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+          }
+        }
       `}</style>
 
       <div className="admin-container">
@@ -554,7 +637,7 @@ export default function AdminPanel() {
             </div>
             <div className="header-text">
               <h1>Admin Panel</h1>
-              <p>KUFF Events Management</p>
+              <p>KUFF Management System</p>
             </div>
           </div>
           <button
@@ -571,204 +654,246 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {/* Owncast Server Control */}
-        <div className="mb-8">
-          <OwncastConfig />
+        {/* Tab Navigation */}
+        <div className="tabs-container">
+          <button
+            className={`tab-button ${activeTab === 'streaming' ? 'active' : ''}`}
+            onClick={() => setActiveTab('streaming')}
+          >
+            <span className="tab-icon">📡</span>
+            Stream Control
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'events' ? 'active' : ''}`}
+            onClick={() => setActiveTab('events')}
+          >
+            <span className="tab-icon">🎉</span>
+            Events
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'chat' ? 'active' : ''}`}
+            onClick={() => setActiveTab('chat')}
+          >
+            <span className="tab-icon">💬</span>
+            Live Chat
+          </button>
         </div>
 
-        {/* Quick Stream Control */}
-        <div className="mb-8">
-          <QuickStreamControl />
-        </div>
-
-        {/* RTMP Credentials for Production */}
-        <div className="mb-8">
-          <RTMPCredentials />
-        </div>
-
-        {/* Google Drive Auto-Upload */}
-        <div className="mb-8">
-          <GoogleDriveSetup />
-        </div>
-
-        {/* Advanced Streaming Control (Own Stream with OBS) */}
-        <details className="mb-8">
-          <summary className="cursor-pointer text-xl font-bold text-cyan-500 mb-4 hover:text-cyan-400 transition-colors">
-            🎬 Advanced Mode: Own Stream with OBS (Click to expand)
-          </summary>
-          <div className="mt-4">
-            <AdminStreamControl />
-          </div>
-        </details>
-
-        <div className="event-form-section">
-          <h2>
-            {editingId ? "Edit Event" : "Add New Event"}
-          </h2>
-
-          <form onSubmit={handleSubmit} className="event-form">
-            <div className="form-field full-width">
-              <label>Event Title *</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-              />
+        {/* Streaming Tab */}
+        {activeTab === 'streaming' && (
+          <div className="tab-content">
+            {/* SRS/Owncast Server Config */}
+            <div className="mb-8">
+              <OwncastConfig />
             </div>
 
-            <div className="form-field">
-              <label>Date *</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                required
-              />
+            {/* Quick Stream Control */}
+            <div className="mb-8">
+              <QuickStreamControl />
             </div>
 
-            <div className="form-field">
-              <label>Time *</label>
-              <input
-                type="time"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                required
-              />
+            {/* RTMP Credentials for Production */}
+            <div className="mb-8">
+              <RTMPCredentials />
             </div>
 
-            <div className="form-field">
-              <label>City/Country *</label>
-              <input
-                type="text"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                required
-                placeholder="Miami, FL"
-              />
+            {/* Google Drive Auto-Upload */}
+            <div className="mb-8">
+              <GoogleDriveSetup />
             </div>
 
-            <div className="form-field">
-              <label>Venue/Club *</label>
-              <input
-                type="text"
-                value={formData.venue}
-                onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                required
-                placeholder="Club Space"
-              />
-            </div>
-
-            <div className="form-field full-width">
-              <label>Description *</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="form-field full-width">
-              <label>Flyer URL (PostImages.org) *</label>
-              <input
-                type="url"
-                value={formData.flyer}
-                onChange={(e) => setFormData({ ...formData, flyer: e.target.value })}
-                required
-                placeholder="https://i.postimg.cc/..."
-              />
-              <p className="help-text">
-                Upload your image to <a href="https://postimages.org" target="_blank" rel="noopener noreferrer">PostImages.org</a> and paste the direct link here
-              </p>
-            </div>
-
-            <div className="form-field full-width">
-              <label>Tickets Link</label>
-              <input
-                type="url"
-                value={formData.ticketLink}
-                onChange={(e) => setFormData({ ...formData, ticketLink: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
-
-            <div className="form-field full-width">
-              <label>Full Address</label>
-              <input
-                type="text"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="34 NE 11th St, Miami, FL 33132"
-              />
-            </div>
-
-            <div className="form-field full-width">
-              <label>Photo URLs (one per line, for past events)</label>
-              <textarea
-                value={formData.photos?.join('\n')}
-                onChange={(e) => setFormData({ ...formData, photos: e.target.value.split('\n').filter(p => p.trim()) })}
-                rows={4}
-                placeholder="https://i.postimg.cc/foto1.jpg&#10;https://i.postimg.cc/foto2.jpg"
-              />
-            </div>
-
-            <div className="form-buttons">
-              <button
-                type="submit"
-                className="btn-submit"
-              >
-                {editingId ? "Update Event" : "Create Event"}
-              </button>
-              {editingId && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="btn-cancel"
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        <div className="events-list-section">
-          <h2>Existing Events</h2>
-
-          <div className="events-grid">
-            {events.map((event) => (
-              <div key={event.id} className="event-card">
-                <div className="event-info">
-                  <h3>{event.title}</h3>
-                  <div className="event-details">
-                    <p>📅 {new Date(event.date).toLocaleDateString()} - {event.time}</p>
-                    <p>📍 {event.venue}, {event.location}</p>
-                    <p>{event.description}</p>
-                  </div>
-                </div>
-                <div className="event-actions">
-                  <button
-                    onClick={() => handleEdit(event)}
-                    className="btn-edit"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(event.id)}
-                    className="btn-delete"
-                  >
-                    Delete
-                  </button>
-                </div>
+            {/* Advanced Streaming Control (Own Stream with OBS) */}
+            <details className="mb-8">
+              <summary>
+                🎬 Advanced Mode: Own Stream with OBS (Click to expand)
+              </summary>
+              <div className="mt-4">
+                <AdminStreamControl />
               </div>
-            ))}
-
-            {events.length === 0 && (
-              <p className="no-events">No events yet</p>
-            )}
+            </details>
           </div>
-        </div>
+        )}
+
+        {/* Events Tab */}
+        {activeTab === 'events' && (
+          <div className="tab-content">
+            <div className="event-form-section">
+              <h2>
+                {editingId ? "Edit Event" : "Add New Event"}
+              </h2>
+
+              <form onSubmit={handleSubmit} className="event-form">
+                <div className="form-field full-width">
+                  <label>Event Title *</label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label>Date *</label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label>Time *</label>
+                  <input
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label>City/Country *</label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    required
+                    placeholder="Miami, FL"
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label>Venue/Club *</label>
+                  <input
+                    type="text"
+                    value={formData.venue}
+                    onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+                    required
+                    placeholder="Club Space"
+                  />
+                </div>
+
+                <div className="form-field full-width">
+                  <label>Description *</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div className="form-field full-width">
+                  <label>Flyer URL (PostImages.org) *</label>
+                  <input
+                    type="url"
+                    value={formData.flyer}
+                    onChange={(e) => setFormData({ ...formData, flyer: e.target.value })}
+                    required
+                    placeholder="https://i.postimg.cc/..."
+                  />
+                  <p className="help-text">
+                    Upload your image to <a href="https://postimages.org" target="_blank" rel="noopener noreferrer">PostImages.org</a> and paste the direct link here
+                  </p>
+                </div>
+
+                <div className="form-field full-width">
+                  <label>Tickets Link</label>
+                  <input
+                    type="url"
+                    value={formData.ticketLink}
+                    onChange={(e) => setFormData({ ...formData, ticketLink: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div className="form-field full-width">
+                  <label>Full Address</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="34 NE 11th St, Miami, FL 33132"
+                  />
+                </div>
+
+                <div className="form-field full-width">
+                  <label>Photo URLs (one per line, for past events)</label>
+                  <textarea
+                    value={formData.photos?.join('\n')}
+                    onChange={(e) => setFormData({ ...formData, photos: e.target.value.split('\n').filter(p => p.trim()) })}
+                    rows={4}
+                    placeholder="https://i.postimg.cc/foto1.jpg&#10;https://i.postimg.cc/foto2.jpg"
+                  />
+                </div>
+
+                <div className="form-buttons">
+                  <button
+                    type="submit"
+                    className="btn-submit"
+                  >
+                    {editingId ? "Update Event" : "Create Event"}
+                  </button>
+                  {editingId && (
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="btn-cancel"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            <div className="events-list-section">
+              <h2>Existing Events</h2>
+
+              <div className="events-grid">
+                {events.map((event) => (
+                  <div key={event.id} className="event-card">
+                    <div className="event-info">
+                      <h3>{event.title}</h3>
+                      <div className="event-details">
+                        <p>📅 {new Date(event.date).toLocaleDateString()} - {event.time}</p>
+                        <p>📍 {event.venue}, {event.location}</p>
+                        <p>{event.description}</p>
+                      </div>
+                    </div>
+                    <div className="event-actions">
+                      <button
+                        onClick={() => handleEdit(event)}
+                        className="btn-edit"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(event.id)}
+                        className="btn-delete"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {events.length === 0 && (
+                  <p className="no-events">No events yet</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Live Chat Tab */}
+        {activeTab === 'chat' && (
+          <div className="tab-content">
+            <ChatModeration />
+          </div>
+        )}
       </div>
     </div>
   );
