@@ -2,8 +2,10 @@
 
 ## Credenciales de Streaming
 
-**Server (URL):** `rtmp://kuff-srs.fly.dev:1935/live`
+**Server (URL):** `rtmp://66.51.126.59:1935/live`
 **Stream Key:** `QS76Y2rDmfxm*upmFVO@vpO99KyOyJ`
+
+> **Nota:** También puedes usar `rtmp://kuff-srs.fly.dev:1935/live` como server URL
 
 ---
 
@@ -16,7 +18,7 @@
 
 ### 2. Configurar servidor RTMP
 - **Service:** Selecciona **Custom** (Personalizado)
-- **Server:** `rtmp://kuff-srs.fly.dev:1935/live`
+- **Server:** `rtmp://66.51.126.59:1935/live`
 - **Stream Key:** `QS76Y2rDmfxm*upmFVO@vpO99KyOyJ`
 - Click **OK**
 
