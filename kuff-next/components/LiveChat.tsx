@@ -40,6 +40,8 @@ export default function LiveChat({ isLive }: LiveChatProps) {
 
     // Fetch last 50 messages
     const fetchMessages = async () => {
+      if (!supabase) return;
+
       const { data, error } = await supabase
         .from('live_chat_messages')
         .select('*')
@@ -59,6 +61,8 @@ export default function LiveChat({ isLive }: LiveChatProps) {
     fetchMessages();
 
     // Subscribe to new messages
+    if (!supabase) return;
+
     const channel = supabase
       .channel('live_chat')
       .on(
