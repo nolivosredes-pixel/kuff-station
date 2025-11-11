@@ -1,3 +1,5 @@
 {
-  "framework": "nextjs"
+  "buildCommand": "cd kuff-next && npm run build",
+  "outputDirectory": "kuff-next/.next",
+  "installCommand": "cd kuff-next && npm install"
 }
