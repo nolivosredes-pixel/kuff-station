@@ -1,6 +1,6 @@
 # Fly.io configuration for KUFF SRS Server
 app = "kuff-srs"
-primary_region = "mia"  # Miami - cercano a tu audiencia
+primary_region = "dfw"  # Dallas - cercano a tu audiencia
 
 [build]
   dockerfile = "Dockerfile"
