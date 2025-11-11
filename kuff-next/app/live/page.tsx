@@ -607,8 +607,9 @@ export default function LivePage() {
         /* OFFLINE STATE - YouTube Visualizer */
         <OfflineVisualizer
           youtubeVideos={[
-            'dQw4w9WgXcQ', // Replace with your KUFF YouTube video IDs
-            'dQw4w9WgXcQ', // Add more video IDs from your channel
+            'e9PDVqLDkPw', // KUFF video 1
+            'YdLvREdVBpQ', // KUFF video 2
+            'zn1GdslyqNo', // KUFF video 3
           ]}
         />
       ) : (
