@@ -79,7 +79,9 @@ export default function LiveChat({ isLive }: LiveChatProps) {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (supabase) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [isLive, chatEnabled]);
 
