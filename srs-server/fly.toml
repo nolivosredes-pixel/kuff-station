@@ -46,6 +46,21 @@ primary_region = "dfw"  # Dallas - cercano a tu audiencia
   [[services.ports]]
     port = 1985
 
+# WebRTC Server (puerto 8000)
+[[services]]
+  internal_port = 8000
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 8000
+
+[[services]]
+  internal_port = 8000
+  protocol = "udp"
+
+  [[services.ports]]
+    port = 8000
+
 [http_service]
   internal_port = 8080
   force_https = true
