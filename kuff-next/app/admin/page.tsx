@@ -13,6 +13,7 @@ import AdminStreamControl from "@/components/AdminStreamControl";
 import OwncastConfig from "@/components/OwncastConfig";
 import ChatModeration from "@/components/ChatModeration";
 import StreamingStudio from "@/components/StreamingStudio";
+import LiveStreamPreview from "@/components/LiveStreamPreview";
 
 type Tab = 'streaming' | 'studio' | 'events' | 'chat';
 
@@ -690,6 +691,11 @@ export default function AdminPanel() {
         {/* Streaming Tab */}
         {activeTab === 'streaming' && (
           <div className="tab-content">
+            {/* Live Stream Preview */}
+            <div className="mb-8">
+              <LiveStreamPreview />
+            </div>
+
             {/* SRS/Owncast Server Config */}
             <div className="mb-8">
               <OwncastConfig />
