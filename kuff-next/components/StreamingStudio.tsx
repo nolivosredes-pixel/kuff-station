@@ -37,6 +37,7 @@ export default function StreamingStudio() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const websocketRef = useRef<WebSocket | null>(null);
   const videoElementsRef = useRef<Map<string, HTMLVideoElement>>(new Map());
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
 
   // Add camera source
   const addCamera = async () => {
@@ -114,7 +115,7 @@ export default function StreamingStudio() {
     ));
   };
 
-  // Start streaming
+  // Start streaming via WebRTC to SRS
   const startStream = async () => {
     if (!canvasRef.current) return;
 
@@ -149,54 +150,103 @@ export default function StreamingStudio() {
         ...audioDestination.stream.getAudioTracks()
       ]);
 
-      // For now, start streaming without WebSocket bridge
-      // TODO: Add proper WebSocket integration for production
-      const mediaRecorder = new MediaRecorder(combinedStream, {
-        mimeType: 'video/webm;codecs=vp8,opus',
-        videoBitsPerSecond: 2500000,
-        audioBitsPerSecond: 128000
-      });
-      mediaRecorderRef.current = mediaRecorder;
+      console.log('Starting WebRTC connection to SRS...');
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          // Stream data is ready - in production this would go to RTMP
-          // For now, we just capture it locally
-          console.log('Stream chunk:', event.data.size, 'bytes');
+      // Create RTCPeerConnection
+      const pc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      });
+      peerConnectionRef.current = pc;
+
+      // Add tracks to peer connection
+      combinedStream.getTracks().forEach(track => {
+        pc.addTrack(track, combinedStream);
+      });
+
+      // Create and set local offer
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      console.log('Sending offer to SRS...');
+
+      // Send offer to SRS WebRTC endpoint
+      const srsUrl = process.env.NEXT_PUBLIC_OWNCAST_SERVER_URL || 'https://kuff-srs.fly.dev';
+      const streamKey = process.env.NEXT_PUBLIC_OWNCAST_STREAM_KEY || 'QS76Y2rDmfxm*upmFVO@vp099KyOyJ';
+
+      const response = await fetch(`${srsUrl}/rtc/v1/publish/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          api: `${srsUrl}/rtc/v1/publish/`,
+          streamurl: `webrtc://${srsUrl.replace('https://', '').replace('http://', '')}/live/${streamKey}`,
+          sdp: offer.sdp,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`SRS responded with ${response.status}: ${await response.text()}`);
+      }
+
+      const answer = await response.json();
+      console.log('Received answer from SRS');
+
+      // Set remote description (SRS answer)
+      await pc.setRemoteDescription({
+        type: 'answer',
+        sdp: answer.sdp,
+      });
+
+      // Monitor connection state
+      pc.oniceconnectionstatechange = () => {
+        console.log('ICE connection state:', pc.iceConnectionState);
+        if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+          console.error('WebRTC connection failed');
+          stopStream();
+          alert('Connection to streaming server lost');
         }
       };
 
-      mediaRecorder.onerror = (error) => {
-        console.error('MediaRecorder error:', error);
-        stopStream();
-        alert('Recording error occurred');
+      pc.onconnectionstatechange = () => {
+        console.log('Connection state:', pc.connectionState);
+        if (pc.connectionState === 'connected') {
+          console.log('✅ Successfully streaming to SRS via WebRTC!');
+        }
       };
-
-      // Start recording
-      mediaRecorder.start(100);
 
       setIsStreaming(true);
       streamStartTime.current = Date.now();
       setStreamStats(prev => ({ ...prev, fps: 30, bitrate: 2500 }));
 
-      console.log('Stream started successfully (local preview mode)');
-      console.log('Note: To stream to SRS, use Streamlabs Mobile or OBS with RTMP');
+      console.log('🔴 Stream started successfully - Broadcasting LIVE to SRS!');
 
     } catch (error) {
       console.error('Error starting stream:', error);
       alert('Could not start stream: ' + (error as Error).message);
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
     }
   };
 
   // Stop streaming
   const stopStream = () => {
-    // Stop MediaRecorder
+    // Close WebRTC peer connection
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+      console.log('WebRTC connection closed');
+    }
+
+    // Stop MediaRecorder (if any)
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current = null;
     }
 
-    // Close WebSocket
+    // Close WebSocket (if any)
     if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
       websocketRef.current.close();
       websocketRef.current = null;
@@ -205,7 +255,7 @@ export default function StreamingStudio() {
     setIsStreaming(false);
     streamStartTime.current = null;
     setStreamStats({ duration: '00:00:00', bitrate: 0, fps: 0, viewers: 0 });
-    console.log('Stream stopped');
+    console.log('🔴 Stream stopped');
   };
 
   // Update duration
