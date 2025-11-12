@@ -72,6 +72,11 @@ export default function Navigation() {
             </Link>
           </li>
           <li>
+            <Link href="/visual" className="nav-link" onClick={closeMenu}>
+              VJ Mix ✨
+            </Link>
+          </li>
+          <li>
             <Link href="#music-hub" className="nav-link" onClick={closeMenu}>
               Music
             </Link>

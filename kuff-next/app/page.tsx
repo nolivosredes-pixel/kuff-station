@@ -7,7 +7,6 @@ import Navigation from "@/components/Navigation";
 import GallerySection from "@/components/GallerySection";
 import FallingIcons from "@/components/FallingIcons";
 import LiveStreamCTA from "@/components/LiveStreamEnhanced";
-import VisualExperience from "@/components/VisualExperience";
 
 export default function Home() {
   return (
@@ -94,9 +93,6 @@ export default function Home() {
 
       {/* Parallax Gallery Section */}
       <GallerySection />
-
-      {/* Visual Experience Section */}
-      <VisualExperience />
 
       {/* Supported By Section */}
       <section className="supported-by">
