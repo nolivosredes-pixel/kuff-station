@@ -34,6 +34,9 @@ export default function StreamingStudio() {
   const previewRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamStartTime = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const websocketRef = useRef<WebSocket | null>(null);
+  const videoElementsRef = useRef<Map<string, HTMLVideoElement>>(new Map());
 
   // Add camera source
   const addCamera = async () => {
@@ -118,33 +121,107 @@ export default function StreamingStudio() {
     try {
       // Create canvas stream
       const canvas = canvasRef.current;
-      const stream = canvas.captureStream(30);
+      const videoStream = canvas.captureStream(30);
 
-      // Add audio from sources
+      // Create audio context for mixing multiple audio sources
+      const audioContext = new AudioContext();
+      const audioDestination = audioContext.createMediaStreamDestination();
+
+      // Mix audio from all enabled sources
       sources.forEach(source => {
         if (source.stream && source.enabled) {
           const audioTracks = source.stream.getAudioTracks();
-          audioTracks.forEach(track => stream.addTrack(track));
+          if (audioTracks.length > 0) {
+            const audioSource = audioContext.createMediaStreamSource(
+              new MediaStream(audioTracks)
+            );
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = source.volume / 100;
+            audioSource.connect(gainNode);
+            gainNode.connect(audioDestination);
+          }
         }
       });
 
-      setIsStreaming(true);
-      streamStartTime.current = Date.now();
-      setStreamStats(prev => ({ ...prev, fps: 30, bitrate: 2500 }));
+      // Combine video and mixed audio
+      const combinedStream = new MediaStream([
+        ...videoStream.getVideoTracks(),
+        ...audioDestination.stream.getAudioTracks()
+      ]);
 
-      // TODO: Send stream to RTMP server via WebSocket
-      console.log('Stream started:', stream);
+      // Connect to WebSocket bridge
+      const ws = new WebSocket('ws://localhost:3002');
+      websocketRef.current = ws;
+
+      ws.onopen = () => {
+        console.log('Connected to stream bridge');
+
+        // Create MediaRecorder to capture and send stream
+        const mediaRecorder = new MediaRecorder(combinedStream, {
+          mimeType: 'video/webm;codecs=vp8,opus',
+          videoBitsPerSecond: 2500000,
+          audioBitsPerSecond: 128000
+        });
+        mediaRecorderRef.current = mediaRecorder;
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0 && ws.readyState === WebSocket.OPEN) {
+            ws.send(event.data);
+          }
+        };
+
+        mediaRecorder.onerror = (error) => {
+          console.error('MediaRecorder error:', error);
+          stopStream();
+          alert('Recording error occurred');
+        };
+
+        // Start recording and send chunks every 100ms
+        mediaRecorder.start(100);
+
+        setIsStreaming(true);
+        streamStartTime.current = Date.now();
+        setStreamStats(prev => ({ ...prev, fps: 30, bitrate: 2500 }));
+
+        console.log('Stream started successfully');
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        alert('Could not connect to streaming server. Make sure the stream bridge is running on port 3002.');
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket connection closed');
+        if (isStreaming) {
+          stopStream();
+        }
+      };
+
     } catch (error) {
       console.error('Error starting stream:', error);
-      alert('Could not start stream');
+      alert('Could not start stream: ' + (error as Error).message);
     }
   };
 
   // Stop streaming
   const stopStream = () => {
+    // Stop MediaRecorder
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+    }
+
+    // Close WebSocket
+    if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
+      websocketRef.current.close();
+      websocketRef.current = null;
+    }
+
     setIsStreaming(false);
     streamStartTime.current = null;
     setStreamStats({ duration: '00:00:00', bitrate: 0, fps: 0, viewers: 0 });
+    console.log('Stream stopped');
   };
 
   // Update duration
@@ -166,7 +243,7 @@ export default function StreamingStudio() {
     return () => clearInterval(interval);
   }, [isStreaming]);
 
-  // Render canvas
+  // Render canvas - REAL rendering
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -177,44 +254,103 @@ export default function StreamingStudio() {
     canvas.width = 1920;
     canvas.height = 1080;
 
+    // Create and maintain video elements for each source
+    sources.forEach(source => {
+      if (source.stream && !videoElementsRef.current.has(source.id)) {
+        const videoElement = document.createElement('video');
+        videoElement.srcObject = source.stream;
+        videoElement.muted = true; // Mute for canvas (audio handled separately)
+        videoElement.autoplay = true;
+        videoElement.playsInline = true;
+        videoElement.play().catch(err => console.log('Video play error:', err));
+        videoElementsRef.current.set(source.id, videoElement);
+      }
+    });
+
+    // Clean up removed sources
+    const currentSourceIds = new Set(sources.map(s => s.id));
+    videoElementsRef.current.forEach((video, id) => {
+      if (!currentSourceIds.has(id)) {
+        video.pause();
+        video.srcObject = null;
+        videoElementsRef.current.delete(id);
+      }
+    });
+
+    let animationFrameId: number;
+
     const render = () => {
-      // Clear canvas
+      // Clear canvas with dark background
       ctx.fillStyle = '#1a1a1a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Render active sources
-      const currentScene = scenes.find(s => s.id === activeScene);
-      if (currentScene) {
-        sources
-          .filter(s => currentScene.sources.includes(s.id) && s.enabled && s.stream)
-          .forEach((source, index) => {
-            if (source.stream) {
-              const videoTrack = source.stream.getVideoTracks()[0];
-              if (videoTrack) {
-                const video = document.createElement('video');
-                video.srcObject = new MediaStream([videoTrack]);
-                video.play();
-                // Draw video on canvas (this is simplified)
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              }
+      // Render enabled sources (simple fullscreen layout)
+      const enabledSources = sources.filter(s => s.enabled && s.stream);
+
+      if (enabledSources.length > 0) {
+        // For now, show the first enabled source fullscreen
+        // TODO: Add proper scene layouts (side-by-side, PIP, etc.)
+        const mainSource = enabledSources[0];
+        const videoElement = videoElementsRef.current.get(mainSource.id);
+
+        if (videoElement && videoElement.readyState >= 2) {
+          // Draw video filling the canvas
+          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        }
+
+        // If there are multiple sources, show them in a grid
+        if (enabledSources.length > 1) {
+          const gridSize = Math.ceil(Math.sqrt(enabledSources.length));
+          const cellWidth = canvas.width / gridSize;
+          const cellHeight = canvas.height / gridSize;
+
+          enabledSources.forEach((source, index) => {
+            const videoElement = videoElementsRef.current.get(source.id);
+            if (videoElement && videoElement.readyState >= 2) {
+              const col = index % gridSize;
+              const row = Math.floor(index / gridSize);
+              const x = col * cellWidth;
+              const y = row * cellHeight;
+              ctx.drawImage(videoElement, x, y, cellWidth, cellHeight);
+
+              // Draw source name
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+              ctx.fillRect(x, y, cellWidth, 40);
+              ctx.fillStyle = '#00d9ff';
+              ctx.font = 'bold 20px Arial';
+              ctx.fillText(source.name, x + 10, y + 28);
             }
           });
+        }
+      } else {
+        // No sources - show placeholder
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Add a source to start', canvas.width / 2, canvas.height / 2);
+        ctx.textAlign = 'left';
       }
 
-      // Stream indicator
+      // Stream indicator overlay
       if (isStreaming) {
-        ctx.fillStyle = '#ff0000';
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
         ctx.fillRect(20, 20, 120, 50);
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 24px Arial';
-        ctx.fillText('LIVE', 50, 53);
+        ctx.font = 'bold 28px Arial';
+        ctx.fillText('🔴 LIVE', 35, 53);
       }
 
-      requestAnimationFrame(render);
+      animationFrameId = requestAnimationFrame(render);
     };
 
     render();
-  }, [sources, activeScene, scenes, isStreaming]);
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [sources, isStreaming]);
 
   return (
     <div className="studio">
