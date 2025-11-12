@@ -173,14 +173,18 @@ export default function StreamingStudio() {
       const srsUrl = process.env.NEXT_PUBLIC_OWNCAST_SERVER_URL || 'https://kuff-srs.fly.dev';
       const streamKey = process.env.NEXT_PUBLIC_OWNCAST_STREAM_KEY || 'QS76Y2rDmfxm*upmFVO@vp099KyOyJ';
 
-      const response = await fetch(`${srsUrl}/rtc/v1/publish/`, {
+      // WebRTC API is on port 1985 (HTTP API port)
+      const srsHost = srsUrl.replace('https://', '').replace('http://', '');
+      const apiUrl = `http://${srsHost}:1985/rtc/v1/publish/`;
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          api: `${srsUrl}/rtc/v1/publish/`,
-          streamurl: `webrtc://${srsUrl.replace('https://', '').replace('http://', '')}/live/${streamKey}`,
+          api: apiUrl,
+          streamurl: `webrtc://${srsHost}/live/${streamKey}`,
           sdp: offer.sdp,
         }),
       });
