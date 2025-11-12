@@ -92,9 +92,10 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Stream Bridge Server running on port ${PORT}`);
   console.log(`RTMP Target: ${RTMP_URL}/${STREAM_KEY}`);
+  console.log('WebSocket ready for connections');
 });
 
 // Graceful shutdown
