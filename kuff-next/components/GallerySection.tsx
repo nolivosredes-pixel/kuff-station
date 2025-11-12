@@ -7,6 +7,20 @@ export default function GallerySection() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const images = [
+    // Nuevas fotos profesionales
+    "JGR03663.jpg",
+    "JGR03690.jpg",
+    "JGR03718.jpg",
+    "JGR03723.jpg",
+    "JGR03725.jpg",
+    "JGR03731.jpg",
+    "JGR03743.jpg",
+    "JGR03756.jpg",
+    "JGR03762.jpg",
+    "JGR03763.jpg",
+    "JGR03766.jpg",
+    "JGR03769.jpg",
+    // Fotos anteriores
     "050425_kuff_sundance_stevengvisuals-10.jpg",
     "050425_kuff_sundance_stevengvisuals-11.jpg",
     "050425_kuff_sundance_stevengvisuals-12.jpg",
