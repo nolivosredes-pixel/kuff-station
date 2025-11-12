@@ -250,3 +250,4 @@ Para problemas o preguntas:
 ## Licencia
 
 Todos los derechos reservados - KUFF DJ 2025
+# Force rebuild
