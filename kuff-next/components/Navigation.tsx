@@ -73,7 +73,7 @@ export default function Navigation() {
           </li>
           <li>
             <Link href="/visual" className="nav-link" onClick={closeMenu}>
-              VJ Mix ✨
+              Video
             </Link>
           </li>
           <li>
