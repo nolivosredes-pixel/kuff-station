@@ -13,7 +13,7 @@ import AdminStreamControl from "@/components/AdminStreamControl";
 import OwncastConfig from "@/components/OwncastConfig";
 import ChatModeration from "@/components/ChatModeration";
 
-type Tab = 'streaming' | 'events' | 'chat';
+type Tab = 'streaming' | 'studio' | 'events' | 'chat';
 
 export default function AdminPanel() {
   const { data: session, status } = useSession();
@@ -664,6 +664,13 @@ export default function AdminPanel() {
             Stream Control
           </button>
           <button
+            className={`tab-button ${activeTab === 'studio' ? 'active' : ''}`}
+            onClick={() => setActiveTab('studio')}
+          >
+            <span className="tab-icon">🎬</span>
+            Streaming Studio
+          </button>
+          <button
             className={`tab-button ${activeTab === 'events' ? 'active' : ''}`}
             onClick={() => setActiveTab('events')}
           >
@@ -760,8 +767,12 @@ export default function AdminPanel() {
             <div className="mb-8">
               <GoogleDriveSetup />
             </div>
+          </div>
+        )}
 
-            {/* Streaming Studio - OBS-like Control */}
+        {/* Streaming Studio Tab */}
+        {activeTab === 'studio' && (
+          <div className="tab-content">
             <div className="mb-8">
               <div style={{
                 background: 'linear-gradient(135deg, rgba(255, 68, 68, 0.2) 0%, rgba(204, 0, 0, 0.2) 100%)',
