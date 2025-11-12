@@ -169,21 +169,19 @@ export default function StreamingStudio() {
 
       console.log('Sending offer to SRS...');
 
-      // Send offer to SRS WebRTC endpoint
+      // Send offer to SRS WebRTC endpoint via Next.js API proxy (to avoid mixed content)
       const srsUrl = process.env.NEXT_PUBLIC_OWNCAST_SERVER_URL || 'https://kuff-srs.fly.dev';
       const streamKey = process.env.NEXT_PUBLIC_OWNCAST_STREAM_KEY || 'QS76Y2rDmfxm*upmFVO@vp099KyOyJ';
-
-      // WebRTC API is on port 1985 (HTTP API port)
       const srsHost = srsUrl.replace('https://', '').replace('http://', '');
-      const apiUrl = `http://${srsHost}:1985/rtc/v1/publish/`;
 
-      const response = await fetch(apiUrl, {
+      // Use Next.js API proxy to avoid HTTPS -> HTTP mixed content issues
+      const response = await fetch('/api/webrtc/publish', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          api: apiUrl,
+          api: `http://${srsHost}:1985/rtc/v1/publish/`,
           streamurl: `webrtc://${srsHost}/live/${streamKey}`,
           sdp: offer.sdp,
         }),
