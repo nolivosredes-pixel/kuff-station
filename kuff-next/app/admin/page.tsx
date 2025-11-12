@@ -761,15 +761,64 @@ export default function AdminPanel() {
               <GoogleDriveSetup />
             </div>
 
-            {/* Advanced Streaming Control (Own Stream with OBS) */}
-            <details className="mb-8">
-              <summary>
-                🎬 Advanced Mode: Own Stream with OBS (Click to expand)
-              </summary>
-              <div className="mt-4">
-                <AdminStreamControl />
+            {/* Streaming Studio - OBS-like Control */}
+            <div className="mb-8">
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 68, 68, 0.2) 0%, rgba(204, 0, 0, 0.2) 100%)',
+                borderRadius: '20px',
+                padding: '30px',
+                border: '2px solid rgba(255, 68, 68, 0.5)',
+                boxShadow: '0 10px 40px rgba(255, 68, 68, 0.2)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
+                  <div>
+                    <h3 style={{
+                      fontSize: '1.8rem',
+                      fontWeight: 700,
+                      color: '#ff4444',
+                      marginBottom: '10px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px',
+                    }}>
+                      🎬 Streaming Studio
+                    </h3>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.05rem', marginBottom: '5px' }}>
+                      OBS-like professional streaming control
+                    </p>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.95rem' }}>
+                      Multi-camera • Screen capture • Phone connection • Scene management
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => router.push('/admin/studio')}
+                    style={{
+                      background: 'linear-gradient(135deg, #ff4444 0%, #cc0000 100%)',
+                      color: 'white',
+                      padding: '15px 40px',
+                      border: 'none',
+                      borderRadius: '50px',
+                      fontWeight: 700,
+                      fontSize: '1.1rem',
+                      cursor: 'pointer',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      boxShadow: '0 10px 30px rgba(255, 68, 68, 0.4)',
+                      transition: 'all 0.3s',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.boxShadow = '0 15px 40px rgba(255, 68, 68, 0.6)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 10px 30px rgba(255, 68, 68, 0.4)';
+                    }}
+                  >
+                    Open Studio →
+                  </button>
+                </div>
               </div>
-            </details>
+            </div>
           </div>
         )}
 
