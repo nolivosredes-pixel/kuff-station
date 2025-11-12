@@ -2,15 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import Script from 'next/script';
 import Link from 'next/link';
-
-// Declare global type for TubesCursor library
-declare global {
-  interface Window {
-    TubesCursor: any;
-  }
-}
 
 // Cloudinary video configuration
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dvpsdkep2';
@@ -38,46 +30,8 @@ export default function VJMixPage() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [nextVideoIndex, setNextVideoIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [tubesLoaded, setTubesLoaded] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const tubesAppRef = useRef<any>(null);
   const currentVideoRef = useRef<HTMLVideoElement>(null);
   const nextVideoRef = useRef<HTMLVideoElement>(null);
-
-  // Initialize Tubes Cursor effect
-  useEffect(() => {
-    if (!tubesLoaded || !canvasRef.current) return;
-
-    const initTubes = async () => {
-      try {
-        // @ts-ignore - External library
-        const TubesCursor = window.TubesCursor;
-        if (!TubesCursor) return;
-
-        tubesAppRef.current = TubesCursor(canvasRef.current, {
-          tubes: {
-            colors: ["#00FFFF", "#0080FF", "#8B5CF6"],
-            lights: {
-              intensity: 250,
-              colors: ["#00FFFF", "#0080FF", "#8B5CF6", "#FF00FF"]
-            }
-          }
-        });
-
-        console.log('Tubes Cursor initialized for VJ page');
-      } catch (error) {
-        console.error('Error initializing Tubes Cursor:', error);
-      }
-    };
-
-    initTubes();
-
-    return () => {
-      if (tubesAppRef.current?.dispose) {
-        tubesAppRef.current.dispose();
-      }
-    };
-  }, [tubesLoaded]);
 
   // Auto-transition between videos every 8 seconds
   useEffect(() => {
@@ -95,14 +49,20 @@ export default function VJMixPage() {
     return () => clearInterval(interval);
   }, [nextVideoIndex]);
 
-  // Auto-play videos
+  // Auto-play videos with error handling
   useEffect(() => {
-    if (currentVideoRef.current) {
-      currentVideoRef.current.play().catch(e => console.log('Video play error:', e));
-    }
-    if (nextVideoRef.current) {
-      nextVideoRef.current.play().catch(e => console.log('Video play error:', e));
-    }
+    const playVideo = async (videoRef: React.RefObject<HTMLVideoElement | null>) => {
+      if (videoRef.current) {
+        try {
+          await videoRef.current.play();
+        } catch (error) {
+          console.log('Video autoplay blocked or error:', error);
+        }
+      }
+    };
+
+    playVideo(currentVideoRef);
+    playVideo(nextVideoRef);
   }, [currentVideoIndex, nextVideoIndex]);
 
   const getCloudinaryVideoUrl = (publicId: string) => {
@@ -111,25 +71,7 @@ export default function VJMixPage() {
 
   return (
     <>
-      {/* Tubes Cursor Script */}
-      <Script
-        src="https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js"
-        onLoad={() => setTubesLoaded(true)}
-        strategy="lazyOnload"
-      />
-
       <div className="fixed inset-0 bg-black overflow-hidden">
-        {/* 3D Tubes Cursor Canvas */}
-        <canvas
-          ref={canvasRef}
-          id="tubes-canvas"
-          className="fixed top-0 left-0 w-full h-full pointer-events-none z-50"
-          style={{
-            opacity: 0.3,
-            mixBlendMode: 'screen'
-          }}
-        />
-
         {/* Current Video Layer */}
         <div
           className="absolute inset-0 flex items-center justify-center"
@@ -145,7 +87,6 @@ export default function VJMixPage() {
             loop
             muted
             playsInline
-            autoPlay
             className="min-w-full min-h-full object-cover"
           />
           {/* Blue filter overlay */}
@@ -168,7 +109,6 @@ export default function VJMixPage() {
             loop
             muted
             playsInline
-            autoPlay
             className="min-w-full min-h-full object-cover"
           />
           {/* Blue filter overlay */}
@@ -274,7 +214,7 @@ export default function VJMixPage() {
             <div className="text-yellow-400 text-xs font-bold mb-2">RELEASED ON</div>
             <div className="relative w-24 h-12">
               <Image
-                src="https://nervousnyc.com/wp-content/uploads/2023/10/Nervous_Wordmark_Yellow.png"
+                src="/assets/images/nervous-records-yellow.png"
                 alt="Nervous Records"
                 fill
                 className="object-contain"
