@@ -210,15 +210,13 @@ export default function VJMixPage() {
 
         {/* Nervous Records Badge */}
         <div className="absolute top-1/2 right-8 -translate-y-1/2 z-20">
-          <div className="bg-black/50 backdrop-blur-sm border border-yellow-400/30 rounded-lg p-4 text-center">
+          <div className="bg-black/50 backdrop-blur-sm border border-yellow-400/30 rounded-lg p-6 text-center">
             <div className="text-yellow-400 text-xs font-bold mb-2">RELEASED ON</div>
-            <div className="relative w-24 h-12">
-              <Image
-                src="/assets/images/nervous-records-yellow.png"
-                alt="Nervous Records"
-                fill
-                className="object-contain"
-              />
+            <div className="text-yellow-400 text-2xl font-black tracking-wider">
+              NERVOUS
+            </div>
+            <div className="text-yellow-400 text-sm opacity-80">
+              RECORDS
             </div>
           </div>
         </div>
