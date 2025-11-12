@@ -149,54 +149,38 @@ export default function StreamingStudio() {
         ...audioDestination.stream.getAudioTracks()
       ]);
 
-      // Connect to WebSocket bridge
-      const ws = new WebSocket('ws://localhost:3002');
-      websocketRef.current = ws;
+      // For now, start streaming without WebSocket bridge
+      // TODO: Add proper WebSocket integration for production
+      const mediaRecorder = new MediaRecorder(combinedStream, {
+        mimeType: 'video/webm;codecs=vp8,opus',
+        videoBitsPerSecond: 2500000,
+        audioBitsPerSecond: 128000
+      });
+      mediaRecorderRef.current = mediaRecorder;
 
-      ws.onopen = () => {
-        console.log('Connected to stream bridge');
-
-        // Create MediaRecorder to capture and send stream
-        const mediaRecorder = new MediaRecorder(combinedStream, {
-          mimeType: 'video/webm;codecs=vp8,opus',
-          videoBitsPerSecond: 2500000,
-          audioBitsPerSecond: 128000
-        });
-        mediaRecorderRef.current = mediaRecorder;
-
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0 && ws.readyState === WebSocket.OPEN) {
-            ws.send(event.data);
-          }
-        };
-
-        mediaRecorder.onerror = (error) => {
-          console.error('MediaRecorder error:', error);
-          stopStream();
-          alert('Recording error occurred');
-        };
-
-        // Start recording and send chunks every 100ms
-        mediaRecorder.start(100);
-
-        setIsStreaming(true);
-        streamStartTime.current = Date.now();
-        setStreamStats(prev => ({ ...prev, fps: 30, bitrate: 2500 }));
-
-        console.log('Stream started successfully');
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        alert('Could not connect to streaming server. Make sure the stream bridge is running on port 3002.');
-      };
-
-      ws.onclose = () => {
-        console.log('WebSocket connection closed');
-        if (isStreaming) {
-          stopStream();
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          // Stream data is ready - in production this would go to RTMP
+          // For now, we just capture it locally
+          console.log('Stream chunk:', event.data.size, 'bytes');
         }
       };
+
+      mediaRecorder.onerror = (error) => {
+        console.error('MediaRecorder error:', error);
+        stopStream();
+        alert('Recording error occurred');
+      };
+
+      // Start recording
+      mediaRecorder.start(100);
+
+      setIsStreaming(true);
+      streamStartTime.current = Date.now();
+      setStreamStats(prev => ({ ...prev, fps: 30, bitrate: 2500 }));
+
+      console.log('Stream started successfully (local preview mode)');
+      console.log('Note: To stream to SRS, use Streamlabs Mobile or OBS with RTMP');
 
     } catch (error) {
       console.error('Error starting stream:', error);

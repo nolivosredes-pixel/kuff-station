@@ -88,17 +88,28 @@ export default function ChatModeration() {
 
     setLoading(true);
 
-    const { error } = await supabase
+    // Get all message IDs first
+    const { data: allMessages } = await supabase
       .from('live_chat_messages')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+      .select('id');
 
-    if (error) {
-      console.error('Error clearing messages:', error);
-      alert('Failed to clear messages');
+    if (allMessages && allMessages.length > 0) {
+      // Delete all messages by their IDs
+      const ids = allMessages.map(msg => msg.id);
+      const { error } = await supabase
+        .from('live_chat_messages')
+        .delete()
+        .in('id', ids);
+
+      if (error) {
+        console.error('Error clearing messages:', error);
+        alert('Failed to clear messages');
+      } else {
+        setMessages([]);
+        alert('All messages deleted successfully');
+      }
     } else {
-      setMessages([]);
-      alert('All messages deleted successfully');
+      alert('No messages to delete');
     }
 
     setLoading(false);
