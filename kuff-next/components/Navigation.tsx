@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLive, setIsLive] = useState(false);
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,6 +46,22 @@ export default function Navigation() {
     setIsMenuOpen(false);
   };
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    closeMenu();
+
+    if (isHomePage) {
+      // If on homepage, smooth scroll to section
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // If on another page, navigate to homepage with hash
+      window.location.href = `/#${sectionId}`;
+    }
+  };
+
   return (
     <nav className={`navbar ${isScrolled ? "scrolled" : ""}`} id="navbar">
       <div className="container">
@@ -57,19 +76,19 @@ export default function Navigation() {
         </Link>
         <ul className={`nav-menu ${isMenuOpen ? "active" : ""}`} id="nav-menu">
           <li>
-            <Link href="/#home" className="nav-link" onClick={closeMenu}>
+            <a href="/#home" className="nav-link" onClick={(e) => handleNavClick(e, 'home')}>
               Home
-            </Link>
+            </a>
           </li>
           <li>
-            <Link href="/#about" className="nav-link" onClick={closeMenu}>
+            <a href="/#about" className="nav-link" onClick={(e) => handleNavClick(e, 'about')}>
               About
-            </Link>
+            </a>
           </li>
           <li>
-            <Link href="/#gallery" className="nav-link" onClick={closeMenu}>
+            <a href="/#gallery" className="nav-link" onClick={(e) => handleNavClick(e, 'gallery')}>
               Gallery
-            </Link>
+            </a>
           </li>
           <li>
             <Link href="/visual" className="nav-link" onClick={closeMenu}>
@@ -77,9 +96,9 @@ export default function Navigation() {
             </Link>
           </li>
           <li>
-            <Link href="/#music-hub" className="nav-link" onClick={closeMenu}>
+            <a href="/#music-hub" className="nav-link" onClick={(e) => handleNavClick(e, 'music-hub')}>
               Music
-            </Link>
+            </a>
           </li>
           <li>
             <Link href="/live" className="nav-link" onClick={closeMenu}>
@@ -87,14 +106,14 @@ export default function Navigation() {
             </Link>
           </li>
           <li>
-            <Link href="/#tour" className="nav-link" onClick={closeMenu}>
+            <a href="/#tour" className="nav-link" onClick={(e) => handleNavClick(e, 'tour')}>
               Events
-            </Link>
+            </a>
           </li>
           <li>
-            <Link href="/#contact" className="nav-link" onClick={closeMenu}>
+            <a href="/#contact" className="nav-link" onClick={(e) => handleNavClick(e, 'contact')}>
               Contact
-            </Link>
+            </a>
           </li>
         </ul>
         <div
