@@ -32,6 +32,7 @@ export default function VisualPage() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [showShareMenu, setShowShareMenu] = useState<number | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState<number | null>(null);
 
   const getCloudinaryVideoUrl = (publicId: string) => {
     return `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/q_auto,f_auto,w_800,ar_9:16,c_fill/${publicId}.mp4`;
@@ -95,6 +96,43 @@ export default function VisualPage() {
     }
   }, []);
 
+  // Handle keyboard navigation for modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedVideoIndex === null) return;
+
+      if (e.key === 'Escape') {
+        setSelectedVideoIndex(null);
+      } else if (e.key === 'ArrowLeft') {
+        setSelectedVideoIndex((prev) => (prev === null || prev === 0 ? videos.length - 1 : prev - 1));
+      } else if (e.key === 'ArrowRight') {
+        setSelectedVideoIndex((prev) => (prev === null || prev === videos.length - 1 ? 0 : prev + 1));
+      }
+    };
+
+    if (selectedVideoIndex !== null) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedVideoIndex]);
+
+  const handleVideoClick = (index: number) => {
+    setSelectedVideoIndex(index);
+  };
+
+  const handlePrevVideo = () => {
+    setSelectedVideoIndex((prev) => (prev === null || prev === 0 ? videos.length - 1 : prev - 1));
+  };
+
+  const handleNextVideo = () => {
+    setSelectedVideoIndex((prev) => (prev === null || prev === videos.length - 1 ? 0 : prev + 1));
+  };
+
   return (
     <>
       <Navigation />
@@ -155,6 +193,7 @@ export default function VisualPage() {
                 key={index}
                 id={video.id}
                 className="video-card"
+                onClick={() => handleVideoClick(index)}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 style={{
@@ -180,13 +219,13 @@ export default function VisualPage() {
                     src={getCloudinaryVideoUrl(video.publicId)}
                     poster={getCloudinaryThumbnail(video.publicId)}
                     loop
+                    muted
                     playsInline
-                    controls
-                    controlsList="nodownload"
                     style={{
                       width: '100%',
                       height: '100%',
-                      objectFit: 'cover'
+                      objectFit: 'cover',
+                      pointerEvents: 'none'
                     }}
                   />
 
@@ -524,6 +563,220 @@ export default function VisualPage() {
         </div>
       </section>
 
+      {/* Video Modal */}
+      {selectedVideoIndex !== null && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0, 0, 0, 0.95)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: 'fadeIn 0.3s ease'
+          }}
+          onClick={() => setSelectedVideoIndex(null)}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setSelectedVideoIndex(null)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'rgba(0, 217, 255, 0.1)',
+              border: '2px solid rgba(0, 217, 255, 0.3)',
+              borderRadius: '50%',
+              width: '50px',
+              height: '50px',
+              color: 'var(--primary-color)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '24px',
+              transition: 'all 0.3s ease',
+              zIndex: 10001
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 217, 255, 0.2)';
+              e.currentTarget.style.borderColor = 'var(--primary-color)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 217, 255, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+
+          {/* Previous Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrevVideo();
+            }}
+            style={{
+              position: 'absolute',
+              left: '20px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'rgba(0, 217, 255, 0.1)',
+              border: '2px solid rgba(0, 217, 255, 0.3)',
+              borderRadius: '50%',
+              width: '60px',
+              height: '60px',
+              color: 'var(--primary-color)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '24px',
+              transition: 'all 0.3s ease',
+              zIndex: 10001
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 217, 255, 0.2)';
+              e.currentTarget.style.borderColor = 'var(--primary-color)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 217, 255, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+
+          {/* Next Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNextVideo();
+            }}
+            style={{
+              position: 'absolute',
+              right: '20px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'rgba(0, 217, 255, 0.1)',
+              border: '2px solid rgba(0, 217, 255, 0.3)',
+              borderRadius: '50%',
+              width: '60px',
+              height: '60px',
+              color: 'var(--primary-color)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '24px',
+              transition: 'all 0.3s ease',
+              zIndex: 10001
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 217, 255, 0.2)';
+              e.currentTarget.style.borderColor = 'var(--primary-color)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 217, 255, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+
+          {/* Video Container */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '20px',
+              animation: 'scaleIn 0.3s ease'
+            }}
+          >
+            {/* Video */}
+            <div style={{
+              position: 'relative',
+              maxHeight: '80vh',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 20px 60px rgba(0, 217, 255, 0.3)',
+              border: '2px solid rgba(0, 217, 255, 0.3)'
+            }}>
+              <video
+                key={selectedVideoIndex}
+                src={getCloudinaryVideoUrl(videos[selectedVideoIndex].publicId)}
+                autoPlay
+                loop
+                controls
+                playsInline
+                style={{
+                  maxWidth: '90vw',
+                  maxHeight: '80vh',
+                  display: 'block'
+                }}
+              />
+            </div>
+
+            {/* Video Info */}
+            <div style={{
+              textAlign: 'center',
+              maxWidth: '600px',
+              padding: '20px',
+              background: 'rgba(10, 10, 10, 0.8)',
+              borderRadius: '12px',
+              border: '1px solid rgba(0, 217, 255, 0.3)'
+            }}>
+              <h3 style={{
+                background: 'linear-gradient(90deg, #00d9ff 0%, #00ffff 50%, #00d9ff 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                marginBottom: '10px',
+                backgroundSize: '200% auto',
+                animation: 'gradientShift 3s linear infinite'
+              }}>
+                {videos[selectedVideoIndex].title}
+              </h3>
+              <p style={{
+                color: 'var(--text-secondary)',
+                fontSize: '1rem',
+                margin: 0
+              }}>
+                {videos[selectedVideoIndex].description}
+              </p>
+              <p style={{
+                color: 'var(--text-muted)',
+                fontSize: '0.9rem',
+                marginTop: '10px'
+              }}>
+                {selectedVideoIndex + 1} / {videos.length}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         .video-card {
           cursor: pointer;
@@ -542,6 +795,26 @@ export default function VisualPage() {
           }
           100% {
             background-position: 0% 50%;
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
           }
         }
 
