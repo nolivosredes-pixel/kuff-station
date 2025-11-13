@@ -15,16 +15,16 @@ interface Video {
 
 // Videos uploaded to Cloudinary
 const videos: Video[] = [
-  { publicId: 'REEL_1_compressed_xyzub5', title: 'KUFF Reel 1', description: 'Visual Performance' },
-  { publicId: 'REEL_2_compressed_ntpptd', title: 'KUFF Reel 2', description: 'Tech House Vibes' },
-  { publicId: 'REEL_4_compressed_gnqyv3', title: 'KUFF Reel 4', description: 'Live Set' },
-  { publicId: 'REEL_5_compressed_pe6fwz', title: 'KUFF Reel 5', description: 'Festival Energy' },
-  { publicId: 'REEL_6_compressed_mzlnm1', title: 'KUFF Reel 6', description: 'Club Night' },
-  { publicId: 'REEL_7_compressed_aisuvb', title: 'KUFF Reel 7', description: 'Minimal Bass' },
-  { publicId: 'REEL_8_compressed_dxx62m', title: 'KUFF Reel 8', description: 'Underground' },
-  { publicId: 'REEL_9_compressed_ze6lqx', title: 'KUFF Reel 9', description: 'Peak Time' },
-  { publicId: 'REEL_10_compressed_tz5b3q', title: 'KUFF Reel 10', description: 'Indie Dance' },
-  { publicId: 'REEL_14_compressed_daj3ay', title: 'KUFF Reel 14', description: 'Special Set' },
+  { publicId: 'REEL_1_compressed_xyzub5', title: 'Visual Performance', description: 'Live Energy' },
+  { publicId: 'REEL_2_compressed_ntpptd', title: 'Tech House Vibes', description: 'Peak Hour' },
+  { publicId: 'REEL_4_compressed_gnqyv3', title: 'Live Set', description: 'Underground' },
+  { publicId: 'REEL_5_compressed_pe6fwz', title: 'Festival Energy', description: 'Main Stage' },
+  { publicId: 'REEL_6_compressed_mzlnm1', title: 'Club Night', description: 'Dark Room' },
+  { publicId: 'REEL_7_compressed_aisuvb', title: 'Minimal Bass', description: 'Deep Grooves' },
+  { publicId: 'REEL_8_compressed_dxx62m', title: 'Underground', description: 'Raw Energy' },
+  { publicId: 'REEL_9_compressed_ze6lqx', title: 'Peak Time', description: 'Crowd Control' },
+  { publicId: 'REEL_10_compressed_tz5b3q', title: 'Indie Dance', description: 'Melodic Beats' },
+  { publicId: 'REEL_14_compressed_daj3ay', title: 'Special Set', description: 'Exclusive' },
 ];
 
 export default function VisualPage() {
@@ -50,7 +50,20 @@ export default function VisualPage() {
       }}>
         <div className="container">
           <div className="section-header" style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h2 className="section-title">Visual Experience</h2>
+            <h2 className="section-title" style={{
+              background: 'linear-gradient(135deg, #00d9ff 0%, #00ffff 50%, #00d9ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontSize: '3.5rem',
+              fontWeight: '900',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              animation: 'gradientShift 3s ease infinite',
+              marginBottom: '20px'
+            }}>
+              Visual Experience
+            </h2>
             <div className="title-underline" style={{ margin: '0 auto' }}></div>
             <p style={{
               color: 'var(--text-secondary)',
@@ -59,8 +72,17 @@ export default function VisualPage() {
               maxWidth: '700px',
               margin: '20px auto 0'
             }}>
-              Explora los mejores momentos de KUFF en escena. Videos oficiales lanzados en{' '}
-              <span style={{ color: '#ffd700', fontWeight: 'bold' }}>NERVOUS RECORDS</span>
+              Explore the best moments of KUFF on stage. Official videos released on{' '}
+              <span style={{
+                background: 'linear-gradient(90deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontWeight: 'bold',
+                animation: 'gradientShift 3s ease infinite'
+              }}>
+                NERVOUS RECORDS
+              </span>
             </p>
           </div>
 
@@ -154,11 +176,16 @@ export default function VisualPage() {
                   background: 'linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(0, 0, 0, 0.98) 100%)'
                 }}>
                   <h3 style={{
-                    color: 'var(--primary-color)',
+                    background: 'linear-gradient(90deg, #00d9ff 0%, #00ffff 50%, #00d9ff 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                     fontSize: '1.1rem',
                     fontWeight: '700',
                     marginBottom: '8px',
-                    letterSpacing: '0.5px'
+                    letterSpacing: '0.5px',
+                    backgroundSize: '200% auto',
+                    animation: 'gradientShift 3s linear infinite'
                   }}>
                     {video.title}
                   </h3>
@@ -210,12 +237,17 @@ export default function VisualPage() {
                   Officially Released on
                 </p>
                 <p style={{
-                  color: '#ffd700',
+                  background: 'linear-gradient(90deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
                   fontSize: '1.5rem',
                   fontWeight: '900',
                   margin: 0,
                   letterSpacing: '3px',
-                  textShadow: '0 0 20px rgba(255, 215, 0, 0.5)'
+                  textShadow: '0 0 20px rgba(255, 215, 0, 0.5)',
+                  backgroundSize: '200% auto',
+                  animation: 'gradientShift 3s linear infinite'
                 }}>
                   NERVOUS RECORDS
                 </p>
@@ -234,6 +266,18 @@ export default function VisualPage() {
           border: 2px solid var(--primary-color);
         }
 
+        @keyframes gradientShift {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+
         @media (max-width: 768px) {
           .visual-section {
             padding-top: 100px !important;
@@ -242,6 +286,10 @@ export default function VisualPage() {
 
           .section-header {
             margin-bottom: 40px !important;
+          }
+
+          .section-title {
+            font-size: 2.5rem !important;
           }
         }
       `}</style>
