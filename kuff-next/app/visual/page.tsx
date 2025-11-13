@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Navigation from '@/components/Navigation';
 
 // Cloudinary video configuration
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dvpsdkep2';
@@ -38,9 +39,11 @@ export default function VisualPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
-      <div className="bg-gradient-to-b from-black via-gray-900 to-black border-b border-cyan-500/20">
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-black">
+        {/* Header */}
+        <div className="bg-gradient-to-b from-black via-gray-900 to-black border-b border-cyan-500/20">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -156,6 +159,7 @@ export default function VisualPage() {
           background: #00ffff;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
