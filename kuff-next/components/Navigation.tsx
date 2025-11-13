@@ -46,7 +46,7 @@ export default function Navigation() {
   return (
     <nav className={`navbar ${isScrolled ? "scrolled" : ""}`} id="navbar">
       <div className="container">
-        <div className="nav-logo">
+        <Link href="/" className="nav-logo">
           <Image
             src="/assets/images/kuff-white.png"
             alt="KUFF Logo"
@@ -54,20 +54,20 @@ export default function Navigation() {
             width={40}
             height={40}
           />
-        </div>
+        </Link>
         <ul className={`nav-menu ${isMenuOpen ? "active" : ""}`} id="nav-menu">
           <li>
-            <Link href="#home" className="nav-link" onClick={closeMenu}>
+            <Link href="/#home" className="nav-link" onClick={closeMenu}>
               Home
             </Link>
           </li>
           <li>
-            <Link href="#about" className="nav-link" onClick={closeMenu}>
+            <Link href="/#about" className="nav-link" onClick={closeMenu}>
               About
             </Link>
           </li>
           <li>
-            <Link href="#gallery" className="nav-link" onClick={closeMenu}>
+            <Link href="/#gallery" className="nav-link" onClick={closeMenu}>
               Gallery
             </Link>
           </li>
@@ -77,7 +77,7 @@ export default function Navigation() {
             </Link>
           </li>
           <li>
-            <Link href="#music-hub" className="nav-link" onClick={closeMenu}>
+            <Link href="/#music-hub" className="nav-link" onClick={closeMenu}>
               Music
             </Link>
           </li>
@@ -87,12 +87,12 @@ export default function Navigation() {
             </Link>
           </li>
           <li>
-            <Link href="#tour" className="nav-link" onClick={closeMenu}>
+            <Link href="/#tour" className="nav-link" onClick={closeMenu}>
               Events
             </Link>
           </li>
           <li>
-            <Link href="#contact" className="nav-link" onClick={closeMenu}>
+            <Link href="/#contact" className="nav-link" onClick={closeMenu}>
               Contact
             </Link>
           </li>
